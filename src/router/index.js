@@ -7,7 +7,7 @@ import RecipeBoxView from '@/views/RecipeBoxView.vue'
 import MyRecipeView from '@/views/MyRecipeView.vue'
 import RecipeFilterView from '@/views/RecipeFilterView.vue'
 import RecipeBoxListView from '@/views/RecipeBoxListView.vue'
-import SwiperTestView from '@/views/SwiperTestView.vue'
+import SwiperView from "@/views/SwiperView.vue";
 
 Vue.use(VueRouter)
 
@@ -48,9 +48,9 @@ const routes = [
     component: RecipeFilterView
   },
   {
-    path : '/test',
+    path : '/swiper',
     name: 'FilterSwiper',
-    component: SwiperTestView
+    component: SwiperView
   },
 
   {
