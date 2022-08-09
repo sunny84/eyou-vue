@@ -1,160 +1,165 @@
 <template>
-    <div>
-        <div>
-        <!--HEADER-->
-            <h4>{{ $t("title.recipeBox") }}</h4>
-            <div class="navbar">
-                <ul class="subnav">                    
-                    <li><router-link :to="'/myrecipe'">{{ $t("menu.myRecipe") }}</router-link></li>
-                    <li><router-link :to="'/recipeboxlist'">{{ $t("menu.savedRecipe") }}</router-link></li>
-                    <li><router-link :to="'#'">{{ $t("menu.historyRecipe") }}</router-link></li>
-                </ul>
+  <div>
+    <main class="recipebox">
+        <h1 class="fl"><router-link :to="'/recipedetail/'+recipeId"><img src="@/assets/images/icon_back.png" alt="돌아가기" title="돌아가기"/></router-link>
+        <span class="color-orange padding-left-15">{{ $t("title.recipeBox") }}</span>
+        </h1>
+        <div class="wrap_menu">
+            <ul>
+                <li class="menu" style="cursor: ponter;" onclick="location.href='/myrecipe';">{{ $t("menu.myRecipe") }}</li><!--<router-link :to="'/myrecipe'"></router-link>-->
+                <li class="menu on" style="cursor: ponter;" onclick="location.href='/recipeboxlist';">{{ $t("menu.savedRecipe") }}</li><!--<router-link :to="'/recipeboxlist'"></router-link>-->
+                <li class="menu" style="cursor: ponter;" onclick="location.href='';">{{ $t("menu.historyRecipe") }}</li><!--<router-link :to="'#'"></router-link>-->
+            </ul>
+        </div>  
+        <div class="boxes-wrap">
+            <div class="wrap_keywords boxes swiper-container swiper-navigation">
+                <swiper class="swiper" ref="filterSwiper" :options="swiperOption" role="tablist">
+                    <swiper-slide class="keywords" role="tab" 
+                        v-for="(item, index) in recipeBoxes"
+                        :key="index"><!-- class="swiper-slide" -->
+                        <div>
+                            <button @click="selectRecipeBox(item.id)">{{item.name}} {{item.id}}<span hidden>({{item.id}})</span></button>
+                        </div>
+                    </swiper-slide>
+                    <swiper-slide role="tab">
+                        <div>
+                            <button @click="addNewBoxPage()">+{{ $t('button.addNewBox') }}</button>
+                        </div>
+                    </swiper-slide>
+                </swiper>
+                <!-- <div class="wrapper">
+                <div class="swiper-pagination" slot="pagination"></div>
+                <div class="swiper-button-prev" slot="button-prev"></div>
+                <div class="swiper-button-next" slot="button-next"></div>
+                </div> -->
             </div>
-            
-            <div class="boxes-wrap">
-                <div class="boxes swiper-container swiper-navigation">
-                    <swiper class="swiper" ref="filterSwiper" :options="swiperOption" role="tablist">
-                        <swiper-slide class="swiper-slide" role="tab" 
-                            v-for="(item, index) in recipeBoxes"
-                            :key="index">
-                            <div>
-                                <button @click="selectRecipeBox(item.id)">{{item.name}}<span hidden>({{item.id}})</span></button>
-                            </div>
-                        </swiper-slide>
-                        <swiper-slide role="tab">
-                            <div>
-                                <button @click="addNewBoxPage()">+{{ $t('button.addNewBox') }}</button>
-                            </div>
-                        </swiper-slide>
-                    </swiper>
-                    <!-- <div class="wrapper">
-                    <div class="swiper-pagination" slot="pagination"></div>
-                    <div class="swiper-button-prev" slot="button-prev"></div>
-                    <div class="swiper-button-next" slot="button-next"></div>
-                    </div> -->
-                </div>
-                <div>
-                    <span hidden>선택된 레시피박스: {{ selectedRecipeBox.name }}[{{ selectedRecipeBox.id }}]</span>
-                </div>
+            <div>
+                <span hidden>선택된 레시피박스: {{ selectedRecipeBox.name }}[{{ selectedRecipeBox.id }}]</span>
             </div>
-            
-        <!--CONTENTS-->
-            <div class="contents" v-if="step===1">
-                {{$t("content.all")}} {{ recipeList.length }}
-                <button @click="callEdit">{{$t("button.edit")}}</button>
-                <table>
-                    <thead>
-                        <td></td>
-                        <td></td>
-                    </thead>
-                    <tr v-for="(recipe, index) in recipeList.slice(0,5)" :key="index"><!-- 최대 5개 -->
-                        <td>
-                            <p>
-                                <img :src="recipe.file" width="200px" height="150px" @error="setEmptyImg">
-                            </p>
-                        </td>
-                        <td>
-                            <router-link :to="'/recipedetail/'+recipe.recipeId">
-                            {{recipe.title}} <br/>
-                            {{recipe.subTitle}} <br/>
-                            <ul v-for="(period, idx) in $t('option.period')" :key="idx">
-                                <li v-if="recipe.period == idx">{{period}} {{recipe.boxName}}|{{recipe.recipeId}}|{{recipe.boxId}}</li>
-                            </ul>
-                            </router-link>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <div class="contents" v-if="step===2">
-                {{$t("content.all")}} {{ recipeList.length }}
-                <input type="checkbox" value="all" v-model="allSelected" />
-                <label for="all">{{$t("content.selectAll")}}</label>
-                <button @click="cancel">{{$t("button.cancel")}}</button>&nbsp;
-                <button @click="done">{{$t("button.done")}}</button>
-                <table>
-                    <thead>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </thead>
-                    <tr v-for="(recipe, index) in recipeList.slice(0,5)" :key="index"><!-- 최대 5개 -->
-                        <td>
-                            <p>
-                                <img :src="recipe.file" width="200px" height="150px" @error="setEmptyImg">
-                            </p>
-                        </td>
-                        <td>
-                            <router-link :to="'/recipedetail/'+recipe.recipeId">
-                            {{recipe.title}} <br/>
-                            {{recipe.subTitle}} <br/>
-                            <span v-if="recipe.new">New</span>
-                            <ul v-for="(period, idx) in $t('option.period')" :key="idx">
-                                <li v-if="recipe.period == idx">{{period}} {{recipe.boxName}} {{recipe.recipeId}} {{recipe.boxId}}</li>
-                            </ul>
-                            </router-link>
-                        </td>
-                        <td>
-                            <input
-                                type="checkbox"
-                                id=index
-                                :value=recipe.recipeId 
-                                v-model="checkedRecipeIds"
-                            >
-                            <!-- <label for=index>{{recipe.title}}</label> -->
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colspan="3">
-                            <span>체크한 이름: {{ checkedRecipeIds }}</span>
-                        </td>
-                    </tr>
-                </table>
-
-                <div class="moveBox" v-if="moveStep===0">
-                    <button @click="callMoveRecipe">{{$t("button.move")}}</button>&nbsp;
-                    <button @click="callDeleteRecipe">{{$t("button.delete")}}</button>
-                    <!-- <button @click="deleteRecipe">{{$t("button.delete")}}</button> -->
-                </div>
-                <div class="moveBox" v-if="moveStep===1">
-                    <div class="moveBoxHeader">
-                        <ul>
-                            <li>{{$t("content.moveBox")}}</li>
-                            <li>
-                                <button @click="addNewBoxPage()">+{{ $t('button.addNewBox') }}</button>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="moveBoxBody">
-                        <ul v-for="(box, index) in recipeBoxes" :key="index">
-                            <li @click="callMoveRecipeBox(box.id)">
-                                <button v-on:click="callDeleteBox(box.id)">X</button>
-                                <p>
-                                    <img :src="box.recipe?box.recipe[0].mainImgId:''" width="200px" height="150px" @error="setEmptyImg">
-                                </p>
-                                {{box.name}}
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="moveBoxFooter">
-                        <button @click="cancel">{{$t("button.cancel")}}</button>
-                    </div>
-                </div>
-            </div>
-            <br/>
-            <div class="contents" id="new-box" v-if="step===3">
-                <fieldset>
-                    <legend>새 박스 추가</legend>
-                    <form v-on:submit="onSubmitForm">
-                        <label for="newBox">새로운 박스의 이름을 입력해 주세요.</label><br/>
-                        <input type="text" v-model="newBox" maxlength="10"> <button>추가</button>
-                    </form>
-                </fieldset>
-                <label id="result-label" hidden for="result"></label><br/>
-                <button @click="cancel">{{$t("button.cancel")}}</button>
-                <!-- <button @click="done">{{$t("button.done")}}</button> -->
-            </div>
-        <!--FOOTER-->
         </div>
+        <div 
+            v-if="step===1"
+            class="btn btn-default edit fr margin-bottom-20">
+            <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
+        </div>
+    </main>
+        
+    <!--CONTENTS-->
+        <div class="contents" v-if="step===1">
+            {{$t("content.all")}} {{ recipeList.length }}
+            <button @click="callEdit">{{$t("button.edit")}}</button>
+            <table>
+                <thead>
+                    <td></td>
+                    <td></td>
+                </thead>
+                <tr v-for="(recipe, index) in recipeList.slice(0,5)" :key="index"><!-- 최대 5개 -->
+                    <td>
+                        <p>
+                            <img :src="recipe.file" width="200px" height="150px" @error="setEmptyImg">
+                        </p>
+                    </td>
+                    <td>
+                        <router-link :to="'/recipedetail/'+recipe.recipeId">
+                        {{recipe.title}} <br/>
+                        {{recipe.subTitle}} <br/>
+                        <ul v-for="(period, idx) in $t('option.period')" :key="idx">
+                            <li v-if="recipe.period == idx">{{period}} {{recipe.boxName}}|{{recipe.recipeId}}|{{recipe.boxId}}</li>
+                        </ul>
+                        </router-link>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="contents" v-if="step===2">
+            {{$t("content.all")}} {{ recipeList.length }}
+            <input type="checkbox" value="all" v-model="allSelected" />
+            <label for="all">{{$t("content.selectAll")}}</label>
+            <button @click="cancel">{{$t("button.cancel")}}</button>&nbsp;
+            <button @click="done">{{$t("button.done")}}</button>
+            <table>
+                <thead>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </thead>
+                <tr v-for="(recipe, index) in recipeList.slice(0,5)" :key="index"><!-- 최대 5개 -->
+                    <td>
+                        <p>
+                            <img :src="recipe.file" width="200px" height="150px" @error="setEmptyImg">
+                        </p>
+                    </td>
+                    <td>
+                        <router-link :to="'/recipedetail/'+recipe.recipeId">
+                        {{recipe.title}} <br/>
+                        {{recipe.subTitle}} <br/>
+                        <span v-if="recipe.new">New</span>
+                        <ul v-for="(period, idx) in $t('option.period')" :key="idx">
+                            <li v-if="recipe.period == idx">{{period}} {{recipe.boxName}} {{recipe.recipeId}} {{recipe.boxId}}</li>
+                        </ul>
+                        </router-link>
+                    </td>
+                    <td>
+                        <input
+                            type="checkbox"
+                            id=index
+                            :value=recipe.recipeId 
+                            v-model="checkedRecipeIds"
+                        >
+                        <!-- <label for=index>{{recipe.title}}</label> -->
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <span>체크한 이름: {{ checkedRecipeIds }}</span>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="moveBox" v-if="moveStep===0">
+                <button @click="callMoveRecipe">{{$t("button.move")}}</button>&nbsp;
+                <button @click="callDeleteRecipe">{{$t("button.delete")}}</button>
+                <!-- <button @click="deleteRecipe">{{$t("button.delete")}}</button> -->
+            </div>
+            <div class="moveBox" v-if="moveStep===1">
+                <div class="moveBoxHeader">
+                    <ul>
+                        <li>{{$t("content.moveBox")}}</li>
+                        <li>
+                            <button @click="addNewBoxPage()">+{{ $t('button.addNewBox') }}</button>
+                        </li>
+                    </ul>
+                </div>
+                <div class="moveBoxBody">
+                    <ul v-for="(box, index) in recipeBoxes" :key="index">
+                        <li @click="callMoveRecipeBox(box.id)">
+                            <button v-on:click="callDeleteBox(box.id)">X</button>
+                            <p>
+                                <img :src="box.recipe?box.recipe[0].mainImgId:''" width="200px" height="150px" @error="setEmptyImg">
+                            </p>
+                            {{box.name}}
+                        </li>
+                    </ul>
+                </div>
+                <div class="moveBoxFooter">
+                    <button @click="cancel">{{$t("button.cancel")}}</button>
+                </div>
+            </div>
+        </div>
+        <br/>
+        <div class="contents" id="new-box" v-if="step===3">
+            <fieldset>
+                <legend>새 박스 추가</legend>
+                <form v-on:submit="onSubmitForm">
+                    <label for="newBox">새로운 박스의 이름을 입력해 주세요.</label><br/>
+                    <input type="text" v-model="newBox" maxlength="10"> <button>추가</button>
+                </form>
+            </fieldset>
+            <label id="result-label" hidden for="result"></label><br/>
+            <button @click="cancel">{{$t("button.cancel")}}</button>
+            <!-- <button @click="done">{{$t("button.done")}}</button> -->
+        </div>
+    <!--FOOTER-->
     </div>
 </template>
 <script>
@@ -166,6 +171,14 @@ export default {
     name : "RecipeBoxView",
     data: ()=>({
         swiperOption: {
+            // on {
+            //     click: function() {
+            //         this.activeTab()
+            //     },
+            //     tap: function() {
+            //         this.activeTab()
+            //     },
+            // },
             slidesPerView: 4,   // 'auto'
             spaceBetween: 10,   // swiper-slide 사이의 간격 지정
             slidesOffsetBefore: 0, // slidesOffsetBefore는 첫번째 슬라이드의 시작점에 대한 변경할 때 사용
@@ -206,12 +219,20 @@ export default {
         newBox : "",
         edit : '',
         tempBoxId : [],
+        recipeId: 0, // TODO: 부모로 부터 상속되어야 한다.
     }),
     created() {
         this.boxId = this.$route.params.boxId;
         this.initialize();
     },
     methods : {
+        // swiperInit: function() {
+        //     this.activeTab()
+        // },
+        // activeTab: function(swiper) {
+        //     swiper
+        // },
+
         initialize() {
             this.getRecipeBoxById(this.boxId);
             this.getRecipeBoxList();
@@ -485,6 +506,12 @@ export default {
         // });
         // console.log(swiper)
     },
+
+    watch: {
+        swiperOption(newValue) {
+            console.log('swiperOption:', newValue)
+        },
+    },
 }
 </script>
 <style lang="scss" scoped>
@@ -521,24 +548,43 @@ button
   .swiper-wrapper {
     .swiper-slide {
       width: auto;
-      min-width: 56px;
+      min-width: 56px !important;overflow: hidden;
       padding: 0px 14px;
-      font-size: 14px;
-      line-height: 36px;
+      line-height: 30px;
       text-align: center;
-      color: #84868c;
-      border: 0;
-      border-radius: 18px;
-      background: #f3f4f7;
+      border:#CBCBCB solid 1px; 
+      color:#CBCBCB;
+      border-radius:20px; 
+      font-weight: 500; 
+      display: inline-block; 
+      padding: 2px 8px; 
+      margin: 0 4px 0 0; 
+      font-size: 14px;
+    //   background: #f3f4f7;
+    background: #fff;
       appearance: none;
       cursor: pointer;
-      &[aria-selected="true"] {
-        color: #fff;
-        background: #000;
+      &[aria-selected="true"] { // FIXME: 왜 적용 안될까? hover 시 텍스트 색상 적용 안됨
+        border: #FF9519 solid 1px; 
+        color:#FF9519;
+        font-weight: 600;
       }
     }
   }
 }
+.swiper-container .swiper-wrapper .swiper-slide:hover {
+        border: #FF9519 solid 1px; 
+        color:#FF9519;
+        font-weight: 600;
+
+}
+
+// main.recipebox .wrap_keywords {min-width:400px !important;overflow: hidden; margin:0 10px 20px;}
+// main.recipebox .wrap_keywords ul {margin:0 10px 0 0; display: inline-block ;}
+// main.recipebox .wrap_keywords .keywords       {cursor: pointer;border:#CBCBCB solid 1px; color:#CBCBCB;border-radius:20px; font-weight: 500; display: inline-block; padding: 2px 8px; margin: 0 4px 0 0; font-size: 14px;} 
+// main.recipebox .wrap_keywords .keywords:hover,
+// main.recipebox .wrap_keywords .keywords.on {border: #FF9519 solid 1px; color:#FF9519;font-weight: 600;} 
+
 .navbar ul {
     list-style: none;
 }
