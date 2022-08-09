@@ -19,20 +19,74 @@
     {{ recipeBoxes.length }}
     <div class="wrap_recipes">
       <div class="row0" 
-          v-for="(box, $index) in recipeBoxes.slice(0,1)" :key="$index"
+          v-for="(box, $index) in recipeBoxes.slice(0,1)" :key="$index">
+        <div class="column1 full fl"
           @click="callRecipeBox(box.id)">
-        <div class="column1 full fl">
           <div class="wrap_row">
             <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
             <div class="title">{{ box.name }} {{ box.id }}</div>
             <div class="new" v-if="box.new"></div>
           </div>
-          <div class="photo" v-for="(r, i) in box.recipe.slice(0,1)" :key="i">
+          <!-- <div class="photo" v-for="(r, $index) in box.recipe.slice(0,4)" :key="$index"> -->
+          <div class="photo" v-for="(r, $index) in box.recipe.slice(0,1)" :key="$index">
             <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-            <!-- <img v-else class="pic" src="@/assets/emptyImg.png"> -->
+            <img v-else class="pic" src="@/assets/emptyImg.png">
+          </div>
+        </div>
+        <div class="column1 full fl"
+          @click="callRecipeBox(recipeBoxes[1].id)">
+          <div class="wrap_row">
+            <div class="circleNum">{{ recipeBoxes[1].recipe?box.recipe.length:0 }}</div>
+            <div class="title">{{ recipeBoxes[1].name }} {{ recipeBoxes[1].id }}</div>
+            <div class="new" v-if="recipeBoxes[1].new"></div>
+          </div>
+          <!-- <div class="photo" v-for="(r, $index) in box.recipe.slice(0,4)" :key="$index"> -->
+          <div class="wrap_photo" v-if="recipeBoxes[1].recipe">
+            <div class="photo" v-for="(r, $index) in box.recipe.slice(0,1)" :key="$index">
+              <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
+              <img v-else class="pic" src="@/assets/emptyImg.png">
+            </div>
+          </div>
+          <div class="wrap_photo" v-else>
+            <div class="photo">
+              <img class="pic" src="@/assets/emptyImg.png">
+            </div>
           </div>
         </div>
       </div>
+      <!-- <div class="row0">
+        <div class="column1 full fl"
+          @click="callRecipeBox(recipeBoxes[2].id)">
+          <div class="wrap_row">
+            <div class="circleNum">{{ recipeBoxes[2].recipe?box.recipe.length:0 }}</div>
+            <div class="title">{{ recipeBoxes[2].name }} {{ recipeBoxes[2].id }}</div>
+            <div class="new" v-if="recipeBoxes[2].new"></div>
+          </div>
+          <div class="photo" v-for="(r, $index) in recipeBoxes[2].recipe.slice(0,1)" :key="$index">
+            <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
+            <img v-else class="pic" src="@/assets/emptyImg.png">
+          </div>
+        </div>
+        <div class="column1 full fl"
+          @click="callRecipeBox(recipeBoxes[3].id)">
+          <div class="wrap_row">
+            <div class="circleNum">{{ recipeBoxes[3].recipe?box.recipe.length:0 }}</div>
+            <div class="title">{{ recipeBoxes[3].name }} {{ recipeBoxes[3].id }}</div>
+            <div class="new" v-if="recipeBoxes[3].new"></div>
+          </div>
+          <div class="wrap_photo" v-if="recipeBoxes[3].recipe">
+            <div class="photo" v-for="(r, $index) in box.recipe.slice(0,1)" :key="$index">
+              <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
+              <img v-else class="pic" src="@/assets/emptyImg.png">
+            </div>
+          </div>
+          <div class="wrap_photo" v-else>
+            <div class="photo">
+              <img class="pic" src="@/assets/emptyImg.png">
+            </div>
+          </div>
+        </div>
+      </div> -->
     </div><!-- FIXME: slice(0,1) 만 나오고 recipeBoxes 했을 때는 왜 안나오지? -->
     <!--<div class="wrap_recipes">
       <div class="row0">
@@ -136,6 +190,7 @@ export default {
   name : "RecipeBoxListView",
   data: ()=>({
     recipeBoxes : [],
+    tempBoxes : [],
     mainPicture : '',
     boxName: '기본박스',
     recipeId: 0,
