@@ -37,10 +37,28 @@
                 <span hidden>선택된 레시피박스: {{ selectedRecipeBox.name }}[{{ selectedRecipeBox.id }}]</span>
             </div>
         </div>
-        <div 
-            v-if="step===1"
-            class="btn btn-default edit fr margin-bottom-20">
-            <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
+        <div v-if="step===1">
+            <div class="wrap_allnum fl">
+                <span class="dp-inline-block fl">{{$t("content.all")}} </span>
+                <span class="num">{{ recipeList.length }}</span>
+            </div>
+            <div class="btn btn-default edit fr">
+                <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
+            </div>
+        </div>
+        <div v-if="step===2">
+            <div class="wrap_allnum fl contents">
+                <div class="fl" v-on:click="on = !on">
+                    <span class="select dp-inline-block fl margin-right-5" v-bind:class="{on:on}" @click="callAllSelect"></span>
+                    <span class="dp-inline-block">{{$t("content.selectAll")}}</span>
+                </div>
+            </div>
+            <div class="btn btn-default fr margin-right-5" @click="done">
+                <span>{{$t("button.done")}}</span>
+            </div>
+            <div class="btn btn-default fr margin-right-5" @click="cancel">
+                <span>{{$t("button.cancel")}}</span>
+            </div>
         </div>
     </main>
         
@@ -220,6 +238,7 @@ export default {
         edit : '',
         tempBoxId : [],
         recipeId: 0, // TODO: 부모로 부터 상속되어야 한다.
+        on: false,
     }),
     created() {
         this.boxId = this.$route.params.boxId;
@@ -380,6 +399,15 @@ export default {
             console.log("Edit");
             this.step = 2
         },
+        callAllSelect() {
+            console.log("All");
+            this.checkedRecipeIds = []
+            if(!this.on){
+                this.recipeList.forEach((recipe, index, arr) => {
+                    this.checkedRecipeIds.push(recipe.recipeId)
+                });
+            }
+        },
         callMoveRecipe() {
             console.log("Move")
             this.moveStep = 1
@@ -511,6 +539,9 @@ export default {
         swiperOption(newValue) {
             console.log('swiperOption:', newValue)
         },
+        on(newValue){
+            console.log("on: ", newValue)
+        }
     },
 }
 </script>
@@ -578,13 +609,6 @@ button
         font-weight: 600;
 
 }
-
-// main.recipebox .wrap_keywords {min-width:400px !important;overflow: hidden; margin:0 10px 20px;}
-// main.recipebox .wrap_keywords ul {margin:0 10px 0 0; display: inline-block ;}
-// main.recipebox .wrap_keywords .keywords       {cursor: pointer;border:#CBCBCB solid 1px; color:#CBCBCB;border-radius:20px; font-weight: 500; display: inline-block; padding: 2px 8px; margin: 0 4px 0 0; font-size: 14px;} 
-// main.recipebox .wrap_keywords .keywords:hover,
-// main.recipebox .wrap_keywords .keywords.on {border: #FF9519 solid 1px; color:#FF9519;font-weight: 600;} 
-
 .navbar ul {
     list-style: none;
 }
