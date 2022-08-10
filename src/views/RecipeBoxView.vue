@@ -52,7 +52,7 @@
                     <div class="photo fl"><img :src="recipe.file"/></div>
                     <div class="wrap_text fl">
                         <div class="wrap_bullet" v-for="(period, idx) in $t('option.period')" :key="idx">
-                            <div class="squre4 fl" v-if="recipe.period == idx">{{ period.slice(0,2) }}</div>
+                            <div class="squre4 fl" v-if="recipe.period == idx">{{ period[0] }}</div>
                             <div class="new2 fl" v-if="recipe.new"></div>
                         </div>
                         <div class="fr"></div>
