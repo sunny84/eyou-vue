@@ -51,12 +51,17 @@
                 <router-link :to="'/recipedetail/'+recipe.recipeId">
                     <div class="photo fl"><img :src="recipe.file"/></div>
                     <div class="wrap_text fl">
-                        <div class="wrap_bullet" v-for="(period, idx) in $t('option.period')" :key="idx">
+                        <div class="wrap_bullet">
+                            <span v-for="(period, idx) in $t('option.period')" :key="idx">
                             <div class="squre4 fl" v-if="recipe.period == idx">{{ period[0] }}</div>
+                            </span>
                             <div class="new2 fl" v-if="recipe.new"></div>
                         </div>
                         <div class="fr"></div>
-                        <div class="title">{{ recipe.title }}</div>
+                        <div class="title">
+                            <div class="fl padding-right-10">{{ recipe.title }}</div>
+                            <spaan class="icon_reply fl"></spaan>
+                        </div>
                         <div class="text">{{ recipe.subTitle }}</div>
                     </div>
                 </router-link>
@@ -86,8 +91,10 @@
                         <img :src="recipe.file"/>
                     </div>
                     <div class="wrap_text fl">
-                        <div class="wrap_bullet" v-for="(period, idx) in $t('option.period')" :key="idx">
+                        <div class="wrap_bullet">
+                            <span v-for="(period, idx) in $t('option.period')" :key="idx">
                             <div class="squre4 fl" v-if="recipe.period == idx">{{ period[0] }}</div>
+                            </span>
                             <div class="new2 fl" v-if="recipe.new"></div>
                         </div>
                         <div class="fr">
@@ -96,7 +103,10 @@
                                 @click="setSelectedRecipe(recipe.recipeId)"
                             />
                         </div>
-                        <div class="title">{{ recipe.title }}</div>
+                        <div class="title">
+                            <div class="fl padding-right-10">{{ recipe.title }}</div>
+                            <spaan class="icon_reply fl"></spaan>
+                        </div>
                         <div class="text">{{ recipe.subTitle }}</div>
                     </div>
                 </div>
