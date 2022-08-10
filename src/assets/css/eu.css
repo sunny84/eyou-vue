@@ -44,8 +44,8 @@ main .wrap_contents .contents1 { margin: 0 auto; width: 100%; display:inline-blo
 main .wrap_contents .contents1:last-child   { margin-right: 0;}
 main .wrap_contents .contents1 .pic         {border-radius: 10px; width: 100%; height: 100%;}
 main .wrap_contents .contents1 .text        { position: relative; text-align: left; font-size: 14px; padding: 10px 0 0 20px;}
-main .wrap_contents .contents1 .text .title {font-size:16px; font-weight: 700; color:#3a3a3a;overflow: hidden; padding: 0 10px 0 0;}
-main .wrap_contents .contents1 .text .longtext  {font-size:14px; color:#666666; padding: 2px 10px 10px 0; letter-spacing:-1px;line-height: 1.4em;
+main .wrap_contents .contents1 .text .title {font-size:16px; font-weight: 700; color:#3a3a3a;width: 260px;overflow: hidden; padding: 0 10px 0 0;}
+main .wrap_contents .contents1 .text .longtext  {font-size:14px; color:#666666; padding: 2px 10px 10px 0; letter-spacing:-1px;width:260px;line-height: 1.4em;
 overflow: hidden; text-overflow: ellipsis; display: -webkit-box;-webkit-line-clamp: 2;-webkit-box-orient: vertical;}
 main .wrap_contents .contents1 .wrap_info {overflow:hidden; font-size: 12px; }
 main .wrap_contents .contents1 .wrap_info .bullet {padding-left: 20px;overflow: hidden; margin-right: 20px;padding-bottom: 3px;}
@@ -54,7 +54,7 @@ main .wrap_contents .contents1 .wrap_info .star   { background: url(../images/bu
 main .wrap_contents .contents1 .wrap_info .chat   { background: url(../images/bul_chat.png) 0 2px  no-repeat;}
 main .wrap_contents .contents1 .squre3   {width: 30px; height: 26px; display: inline-block; background-color: rgba( 2, 136, 112, 0.2 );letter-spacing: -1px; border-radius: 5px;padding-top: 4px;margin:0 10px 10px 0; font-size: 14px;text-align: center; font-weight: 500; color: #028870;}
 main .wrap_contents .contents1 .bookmark1 {width: 30px; height: 26px; display: inline-block; background:url(../images/bul_bookmark.png) center 50% no-repeat;text-indent: -999999px; border-radius: 5px;}
-main .wrap_contents .contents1 .bookmark2 {width: 30px; height: 26px; display: inline-block; background:url(../images/bul_bookmark2.png) center 50% no-repeat;text-indent: -999999px !important; border-radius: 5px;}
+main .wrap_contents .contents1 .bookmark2 {width: 30px; height: 26px; display: inline-block; background:url(../images/bul_bookmark2.png) center 50% no-repeat;text-indent: -999999px; border-radius: 5px;}
 main .wrap_contents .contents1 .share {width: 30px; height: 26px; display: inline-block; background:url(../images/bul_share.png) center 50% no-repeat;text-indent: -999999px; border-radius: 5px;}
 
 main .wrap_contents .contents2 { margin: 0 auto; width: 48%; display:inline-block ; margin-right: 10px; padding-bottom: 30px; position: relative;}
@@ -233,16 +233,17 @@ button.move {width:4%; height:80px;background:url(../images/btn-3line.png) 50% 5
 .circleNum1  {border-radius: 20px;width:16px;background-color:#028870;display: inline-block; color: #fff;text-align: center;font-size: 10px;}
 .btn_circle_plus {background:#d9d9d9 url(../images/icon_circl_plus.png)50% 50% no-repeat;width:100%;height:35px;cursor: pointer;}
 
-.wrap_ingred         {overflow: hidden; padding:10px 20px 20px;}
+.wrap_ingred         {overflow: hidden; padding:10px 20px 20px;display:grid;grid-template-columns:50% 50%;}
 .wrap_ingred li.dot_green {background:url(../images/dot_green.png) left 10px no-repeat;padding:0 10px 10px 20px;}
-.wrap_ingred li.star      {background:url(../images/icon_tip.png) left 7px no-repeat;padding:0 0 0 15px; margin-left: 30px;}
-.wrap_ingred li.dot_green span {padding:0 10px;}
+.wrap_tip         {overflow: hidden; padding:10px 20px 20px;}
+.wrap_tip li.star      {background:url(../images/icon_tip.png) left 7px no-repeat;padding:0 0 0 15px; margin-left: 30px;}
+/*.wrap_ingred li.dot_green span {padding:0 10px; border:1px solid  green;}*/
 .icon_spoon{background:url(../images/icon_spoon.png) 3px 50% no-repeat; padding:0 0 0 20px !important;}
 .title3  {color:#028870; font-weight: 700; font-size: 16px;border-bottom:4px #028870 solid ;margin-bottom: -2px; padding:0 4px 3px 4px;}
 .ti_pic1 {background:url(../images/icon_cook.png) no-repeat; width:45px;height:45px; display: inline-block;text-indent:-999999px;}
 .ti_pic2 {background:url(../images/icon_cookorder.png) left bottom no-repeat; width:34px; display: inline-block;text-indent:-999999px;}
 .ti_pic3 {background:url(../images/icon_video.png) left 50% no-repeat; width:34px; display: inline-block;text-indent:-999999px;}
-.pic2    {border-radius: 10px; width: 100%; height: 90%;}
+.pic2    {border-radius: 10px; width: 100%; }
 .pic3    {border-radius: 10px; width:60px; height:60px;}
 .border_green {border: 2px #028870 solid;padding:0 10px 10px; border-radius: 15px;}
 
@@ -263,7 +264,7 @@ main .wrap_btn .btn {border-radius:20px; box-shadow:4px 4px 5px 0px #bbb;font-si
 main .wrap_btn .btn_kakao  {background:#FFE90A url(../images/logo_kakao.png)15% 50% no-repeat; }
 main .wrap_btn .btn_naver  {background:#00BF19 url(../images/logo_naver.png)15% 50% no-repeat; color: #fff;}
 main .wrap_btn .btn_google {background:#4285F4 url(../images/logo_google.png)15% 50% no-repeat; color: #fff;}
-main .wrap_btn .btn_o       {border-radius:10px; font-size: 14px;color:#fff;font-weight: 400; padding:4px 0; width: 100%; height:;margin: 10px auto; text-align: center;}
+main .wrap_btn .btn_o       {border-radius:10px; font-size: 14px;color:#fff;font-weight: 400; padding:4px 0; width: 100%; margin: 10px auto; text-align: center;}
 main .wrap_btn .btn_review  {background-color:#FF951b;}
 main .modal .signup         {width: 100%;color:#CBCBCB; font-size: 14px; padding: 20px 0 0 0;cursor: pointer;}
 main .modal .signup:hover   {text-decoration: underline; color: #666666;}
@@ -279,7 +280,7 @@ body{
 }
 
 body::-webkit-scrollbar {
-	display:none /* Chrome , Safari , Opera */
+	display:none; /* Chrome , Safari , Opera */
 }
 
 
@@ -317,13 +318,13 @@ body,button,input,select,table,textarea {
 /* 링크 초기화 */
 a { 
     color: #4053FF;
-    text-decoration: none
+    text-decoration: none;
 }
 
 /* 목록 초기화 */
 ol,
 ul {
-    list-style: none
+    list-style: none;
 }
 
 /* 스타일 초기화 */
