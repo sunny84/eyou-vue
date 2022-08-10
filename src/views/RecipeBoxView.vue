@@ -45,6 +45,23 @@
             <div class="btn btn-default edit fr">
                 <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
             </div>
+            <div class="wrap_recipes" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index">
+                <div class="alltitle">{{ recipe.boxName }}</div>
+                <router-link :to="'/recipedetail/'+recipe.recipeId">
+                <div class="wrap_in">
+                    <div class="photo fl"><img :src="recipe.file"/></div>
+                    <div class="wrap_text fl">
+                        <div class="wrap_bullet" v-for="(period, idx) in $t('option.period')" :key="idx">
+                            <div class="squre4 fl" v-if="recipe.period == idx">{{ period.slice(0,2) }}</div>
+                            <div class="new2 fl" v-if="recipe.new"></div>
+                        </div>
+                        <div class="fr"></div>
+                        <div class="title">{{ recipe.title }}</div>
+                        <div class="text">{{ recipe.subTitle }}</div>
+                    </div>
+                </div>
+                </router-link>
+            </div>
         </div>
         <div v-if="step===2">
             <div class="wrap_allnum fl contents">
@@ -59,81 +76,37 @@
             <div class="btn btn-default fr margin-right-5" @click="cancel">
                 <span>{{$t("button.cancel")}}</span>
             </div>
-        </div>
-    </main>
-        
-    <!--CONTENTS-->
-        <div class="contents" v-if="step===1">
-            {{$t("content.all")}} {{ recipeList.length }}
-            <button @click="callEdit">{{$t("button.edit")}}</button>
-            <table>
-                <thead>
-                    <td></td>
-                    <td></td>
-                </thead>
-                <tr v-for="(recipe, index) in recipeList.slice(0,5)" :key="index"><!-- 최대 5개 -->
-                    <td>
-                        <p>
-                            <img :src="recipe.file" width="200px" height="150px" @error="setEmptyImg">
-                        </p>
-                    </td>
-                    <td>
-                        <router-link :to="'/recipedetail/'+recipe.recipeId">
-                        {{recipe.title}} <br/>
-                        {{recipe.subTitle}} <br/>
-                        <ul v-for="(period, idx) in $t('option.period')" :key="idx">
-                            <li v-if="recipe.period == idx">{{period}} {{recipe.boxName}}|{{recipe.recipeId}}|{{recipe.boxId}}</li>
-                        </ul>
-                        </router-link>
-                    </td>
-                </tr>
-            </table>
-        </div>
-        <div class="contents" v-if="step===2">
-            {{$t("content.all")}} {{ recipeList.length }}
-            <input type="checkbox" value="all" v-model="allSelected" />
-            <label for="all">{{$t("content.selectAll")}}</label>
-            <button @click="cancel">{{$t("button.cancel")}}</button>&nbsp;
-            <button @click="done">{{$t("button.done")}}</button>
-            <table>
-                <thead>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                </thead>
-                <tr v-for="(recipe, index) in recipeList.slice(0,5)" :key="index"><!-- 최대 5개 -->
-                    <td>
-                        <p>
-                            <img :src="recipe.file" width="200px" height="150px" @error="setEmptyImg">
-                        </p>
-                    </td>
-                    <td>
-                        <router-link :to="'/recipedetail/'+recipe.recipeId">
-                        {{recipe.title}} <br/>
-                        {{recipe.subTitle}} <br/>
-                        <span v-if="recipe.new">New</span>
-                        <ul v-for="(period, idx) in $t('option.period')" :key="idx">
-                            <li v-if="recipe.period == idx">{{period}} {{recipe.boxName}} {{recipe.recipeId}} {{recipe.boxId}}</li>
-                        </ul>
-                        </router-link>
-                    </td>
-                    <td>
-                        <input
-                            type="checkbox"
-                            id=index
-                            :value=recipe.recipeId 
-                            v-model="checkedRecipeIds"
-                        >
-                        <!-- <label for=index>{{recipe.title}}</label> -->
-                    </td>
-                </tr>
-                <tr>
-                    <td colspan="3">
-                        <span>체크한 이름: {{ checkedRecipeIds }}</span>
-                    </td>
-                </tr>
-            </table>
-
+            <div class="wrap_recipes" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index">
+                <div class="alltitle">{{ recipe.boxName }}</div>
+                <div class="wrap_in">
+                    <div class="photo fl">
+                        <img :src="recipe.file"/>
+                    </div>
+                    <div class="wrap_text fl">
+                        <div class="wrap_bullet" v-for="(period, idx) in $t('option.period')" :key="idx">
+                            <div class="squre4 fl" v-if="recipe.period == idx">{{ period.slice(0,2) }}</div>
+                            <div class="new2 fl" v-if="recipe.new"></div>
+                        </div>
+                        <!-- <div class="fr" v-on:click="recipeIds[0] = !recipeIds[0]"> -->
+                        <div class="fr"><!-- FIXME: v-on:click 처리 어떻게 하지? -->
+                            <!-- <span class="select dp-inline-block fl margin-right-5" 
+                                v-bind:class="{on:on}" 
+                                @click="checkedRecipeIds"
+                            /> -->
+                            <span class="select dp-inline-block fl margin-right-5"
+                                :value=recipe.recipeId 
+                                @click="checkedRecipeIds"
+                            />
+                        </div>
+                        <div class="title">{{ recipe.title }}</div>
+                        <div class="text">{{ recipe.subTitle }}</div>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <span>체크한 이름: {{ checkedRecipeIds }}</span>
+            </div>
+            
             <div class="moveBox" v-if="moveStep===0">
                 <button @click="callMoveRecipe">{{$t("button.move")}}</button>&nbsp;
                 <button @click="callDeleteRecipe">{{$t("button.delete")}}</button>
@@ -164,7 +137,6 @@
                 </div>
             </div>
         </div>
-        <br/>
         <div class="contents" id="new-box" v-if="step===3">
             <fieldset>
                 <legend>새 박스 추가</legend>
@@ -177,7 +149,7 @@
             <button @click="cancel">{{$t("button.cancel")}}</button>
             <!-- <button @click="done">{{$t("button.done")}}</button> -->
         </div>
-    <!--FOOTER-->
+    </main>
     </div>
 </template>
 <script>
@@ -541,6 +513,9 @@ export default {
         },
         on(newValue){
             console.log("on: ", newValue)
+        },
+        checkedRecipeIds(newValue){
+            console.log("checkedRecipeIds: ", newValue)
         }
     },
 }
