@@ -45,10 +45,10 @@
             <div class="btn btn-default edit fr">
                 <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
             </div>
-            <div class="wrap_recipes" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index">
-                <div class="alltitle">{{ recipe.boxName }}</div>
+            <div class="wrap_recipes">
+                <div class="alltitle">{{ selectedRecipeBox.name }}</div>
+                <div class="wrap_in" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index">
                 <router-link :to="'/recipedetail/'+recipe.recipeId">
-                <div class="wrap_in">
                     <div class="photo fl"><img :src="recipe.file"/></div>
                     <div class="wrap_text fl">
                         <div class="wrap_bullet" v-for="(period, idx) in $t('option.period')" :key="idx">
@@ -59,8 +59,8 @@
                         <div class="title">{{ recipe.title }}</div>
                         <div class="text">{{ recipe.subTitle }}</div>
                     </div>
-                </div>
                 </router-link>
+                </div>
             </div>
         </div>
         <div v-if="step===2">
@@ -76,9 +76,9 @@
             <div class="btn btn-default fr margin-right-5" @click="cancel">
                 <span>{{$t("button.cancel")}}</span>
             </div>
-            <div class="wrap_recipes" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index">
-                <div class="alltitle">{{ recipe.boxName }}</div>
-                <div class="wrap_in">
+            <div class="wrap_recipes">
+                <div class="alltitle hidden">{{ selectedRecipeBox.name }}</div>
+                <div class="wrap_in" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index">
                     <div class="photo fl">
                         <img :src="recipe.file"/>
                     </div>
@@ -570,28 +570,28 @@ button
     background: #fff;
       appearance: none;
       cursor: pointer;
-      &[aria-selected="true"] { // FIXME: 왜 적용 안될까? hover 시 텍스트 색상 적용 안됨
-        border: #FF9519 solid 1px; 
-        color:#FF9519;
-        font-weight: 600;
-      }
+    //   &[aria-selected="true"] { // FIXME: 왜 적용 안될까? hover 시 텍스트 색상 적용 안됨
+    //     border: #FF9519 solid 1px; 
+    //     color:#FF9519;
+    //     font-weight: 600;
+    //   }
     }
   }
 }
-.swiper-container .swiper-wrapper .swiper-slide:hover {
-        border: #FF9519 solid 1px; 
-        color:#FF9519;
-        font-weight: 600;
+// .swiper-container .swiper-wrapper .swiper-slide:hover {
+//         border: #FF9519 solid 1px; 
+//         color:#FF9519;
+//         font-weight: 600;
 
-}
-.navbar ul {
-    list-style: none;
-}
-.contents ul {
-    list-style: none;
-}
-.contents li {
-    float: left;
-    margin: 1px 6px;
-}
+// }
+// .navbar ul {
+//     list-style: none;
+// }
+// .contents ul {
+//     list-style: none;
+// }
+// .contents li {
+//     float: left;
+//     margin: 1px 6px;
+// }
 </style>
