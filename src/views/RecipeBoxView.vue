@@ -58,7 +58,10 @@
                             <div class="new2 fl" v-if="recipe.new"></div>
                         </div>
                         <div class="fr"></div>
-                        <div class="title">{{ recipe.title }}</div>
+                        <div class="title">
+                            <div class="fl padding-right-10">{{ recipe.title }}</div>
+                            <spaan class="icon_reply fl"></spaan>
+                        </div>
                         <div class="text">{{ recipe.subTitle }}</div>
                     </div>
                 </router-link>
@@ -100,7 +103,10 @@
                                 @click="setSelectedRecipe(recipe.recipeId)"
                             />
                         </div>
-                        <div class="title">{{ recipe.title }}</div>
+                        <div class="title">
+                            <div class="fl padding-right-10">{{ recipe.title }}</div>
+                            <spaan class="icon_reply fl"></spaan>
+                        </div>
                         <div class="text">{{ recipe.subTitle }}</div>
                     </div>
                 </div>
