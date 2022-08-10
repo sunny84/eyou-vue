@@ -66,7 +66,10 @@
         <div v-if="step===2">
             <div class="wrap_allnum fl contents">
                 <div class="fl" v-on:click="on = !on">
-                    <span class="select dp-inline-block fl margin-right-5" v-bind:class="{on:on}" @click="callAllSelect"></span>
+                    <span class="select dp-inline-block fl margin-right-5" 
+                        :class="{on : on}" 
+                        @click="callAllSelect"
+                    />
                     <span class="dp-inline-block">{{$t("content.selectAll")}}</span>
                 </div>
             </div>
@@ -87,15 +90,10 @@
                             <div class="squre4 fl" v-if="recipe.period == idx">{{ period.slice(0,2) }}</div>
                             <div class="new2 fl" v-if="recipe.new"></div>
                         </div>
-                        <!-- <div class="fr" v-on:click="recipeIds[0] = !recipeIds[0]"> -->
-                        <div class="fr"><!-- FIXME: v-on:click 처리 어떻게 하지? -->
-                            <!-- <span class="select dp-inline-block fl margin-right-5" 
-                                v-bind:class="{on:on}" 
-                                @click="checkedRecipeIds"
-                            /> -->
+                        <div class="fr">
                             <span class="select dp-inline-block fl margin-right-5"
-                                :value=recipe.recipeId 
-                                @click="checkedRecipeIds"
+                                :class="{on : selectedRecipeIds.includes(recipe.recipeId)}" 
+                                @click="setSelectedRecipe(recipe.recipeId)"
                             />
                         </div>
                         <div class="title">{{ recipe.title }}</div>
@@ -104,7 +102,7 @@
                 </div>
             </div>
             <div>
-                <span>체크한 이름: {{ checkedRecipeIds }}</span>
+                <span>체크한 이름: {{ selectedRecipeIds }}</span>
             </div>
             
             <div class="moveBox" v-if="moveStep===0">
@@ -201,7 +199,7 @@ export default {
         moveStep : 0,
         recipeList : [],
         mainPicture : '',
-        checkedRecipeIds : [],
+        selectedRecipeIds : [],
         recipeIds : [],
         tempMap : {},
         boxName : '기본박스',
@@ -278,12 +276,20 @@ export default {
         setEmptyImg(e) {
             e.target.src=emptyImg;
         },
+        setSelectedRecipe(id) {
+            let index = this.selectedRecipeIds.findIndex(x => x === id);
+            if(index>=0) {
+                this.selectedRecipeIds.splice(index, 1);
+            }else{
+                this.selectedRecipeIds.push(id);
+            }
+        },
         selectRecipeBox(id) {
             console.log(`selectRecipeBox: ${id} boxId: ${this.boxId}`);
             location.href=`/recipebox/${id}`;
         },
         moveRecipeBox() {
-            this.checkedRecipeIds.forEach(async (item, index, arr) => {
+            this.selectedRecipeIds.forEach(async (item, index, arr) => {
                 this.tempBoxId.forEach(async (id, index, arr) => {     
                 // console.log(`${this.selectedRecipeBox.id}?recipe=${item}&to=${id}`);           
                     const response = await this.$api(
@@ -354,7 +360,7 @@ export default {
         deleteRecipe() {
             console.log("Delete")            
             // 선택된 레시피박스의 checked 된 recipeId 를 삭제한다.
-            this.checkedRecipeIds.forEach(async (item, index, arr) => {
+            this.selectedRecipeIds.forEach(async (item, index, arr) => {
                 console.log(`${this.selectedRecipeBox.id}?recipe=${item}`);
                 const response = await this.$api(
                 `${this.$API_SERVER}/api/reciperecipebox/${this.selectedRecipeBox.id}`,
@@ -373,10 +379,10 @@ export default {
         },
         callAllSelect() {
             console.log("All");
-            this.checkedRecipeIds = []
+            this.selectedRecipeIds = []
             if(!this.on){
                 this.recipeList.forEach((recipe, index, arr) => {
-                    this.checkedRecipeIds.push(recipe.recipeId)
+                    this.selectedRecipeIds.push(recipe.recipeId)
                 });
             }
         },
@@ -385,13 +391,13 @@ export default {
             this.moveStep = 1
         },
         callMoveRecipeBox(id){
-            if(this.checkedRecipeIds.length == 0) return
+            if(this.selectedRecipeIds.length == 0) return
             this.tempBoxId.push(id);
             this.tempMap = new Map();
             this.recipeList.forEach((recipe, index, arr) => {
                 this.tempMap.set(index, recipe);
             });
-            this.checkedRecipeIds.forEach((recipeId, index, arr) => {
+            this.selectedRecipeIds.forEach((recipeId, index, arr) => {
                 this.recipeList.forEach((recipe, index, arr) => {
                     if(recipeId == recipe.recipeId){
                         this.$delete(arr, index)
@@ -419,7 +425,7 @@ export default {
                 this.tempMap.set(index, recipe);
             });
             // view 화면에서 숨기기
-            this.checkedRecipeIds.forEach((recipeId, index, arr) => {
+            this.selectedRecipeIds.forEach((recipeId, index, arr) => {
                 this.recipeList.forEach((recipe, index, arr) => {
                     if(recipeId == recipe.recipeId){
                         this.$delete(arr, index)
@@ -432,7 +438,7 @@ export default {
         cancel() {
             console.log("cancel")
             if(this.edit == "move"){
-                this.checkedRecipeIds = [];
+                this.selectedRecipeIds = [];
                 this.recipeList = [];
                 for(let i=0;i<this.tempMap.size;i++){
                     this.recipeList.push(this.tempMap.get(i))
@@ -445,7 +451,7 @@ export default {
                 };
             }
             if(this.edit == "deleteRecipe"){
-                this.checkedRecipeIds = [];
+                this.selectedRecipeIds = [];
                 this.recipeList = [];
                 for(let i=0;i<this.tempMap.size;i++){
                     this.recipeList.push(this.tempMap.get(i))
@@ -490,10 +496,10 @@ export default {
                 this.recipeList.slice(0,5).forEach((recipe) => {
                     this.recipeIds.push(recipe.recipeId)
                 })
-                return this.recipeIds.length === this.checkedRecipeIds.length;
+                return this.recipeIds.length === this.selectedRecipeIds.length;
             },
             set: function(e) {
-                this.checkedRecipeIds = e ? this.recipeIds : [];
+                this.selectedRecipeIds = e ? this.recipeIds : [];
             }
         }
     },
@@ -514,9 +520,9 @@ export default {
         on(newValue){
             console.log("on: ", newValue)
         },
-        checkedRecipeIds(newValue){
-            console.log("checkedRecipeIds: ", newValue)
-        }
+        selectedRecipeIds(newValue){
+            console.log("selectedRecipeIds: ", newValue)
+        },     
     },
 }
 </script>
