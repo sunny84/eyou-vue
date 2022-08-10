@@ -60,7 +60,7 @@
                         <div class="fr"></div>
                         <div class="title">
                             <div class="fl padding-right-10">{{ recipe.title }}</div>
-                            <spaan class="icon_reply fl"></spaan>
+                            <span class="icon_reply fl"></span>
                         </div>
                         <div class="text">{{ recipe.subTitle }}</div>
                     </div>
@@ -105,7 +105,7 @@
                         </div>
                         <div class="title">
                             <div class="fl padding-right-10">{{ recipe.title }}</div>
-                            <spaan class="icon_reply fl"></spaan>
+                            <span class="icon_reply fl"></span>
                         </div>
                         <div class="text">{{ recipe.subTitle }}</div>
                     </div>
