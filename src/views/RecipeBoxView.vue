@@ -1,7 +1,7 @@
 <template>
   <div>
     <main class="recipebox">
-        <h1 class="fl"><router-link :to="'/recipedetail/'+recipeId"><img src="@/assets/images/icon_back.png" alt="돌아가기" title="돌아가기"/></router-link>
+        <h1 class="fl"><router-link :to="'/recipedetail/'+rcpId"><img src="@/assets/images/icon_back.png" alt="돌아가기" title="돌아가기"/></router-link>
         <span class="color-orange padding-left-15">{{ $t("title.recipeBox") }}</span>
         </h1>
         <div class="wrap_menu">
@@ -52,7 +52,8 @@
             </div>
             <div class="wrap_recipes">
                 <div class="alltitle">{{ selectedRecipeBox.name }}</div>
-                <div class="wrap_in" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index">
+                <!-- <div class="wrap_in" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index"> -->
+                <div class="wrap_in" v-for="(recipe, index) in recipes" :key="index">
                 <router-link :to="'/recipedetail/'+recipe.recipeId">
                     <div class="photo fl"><img :src="recipe.file"/></div>
                     <div class="wrap_text fl">
@@ -70,6 +71,14 @@
                         <div class="text">{{ recipe.subTitle }}</div>
                     </div>
                 </router-link>
+                </div>
+                <div
+                    type="button"
+                    v-on:click="appendRecipes()"
+                    :disabled="this.dataRcpFull === true"
+                    :class="{disabled : dataRcpFull}"
+                >
+                더보기 ({{cntRecipes}}/{{totRecipes}})
                 </div>
             </div>
         </div>
@@ -196,7 +205,7 @@ export default {
             centerInsufficientSlides: true, // 컨텐츠의 수량에 따라 중앙정렬 여부를 결정함
             slideToClickedSlide: true,
         },
-        recipeBoxes : [],
+        recipeBoxes : [],   // 전체 박스 목록 데이터
         selectedRecipeBox : [],
         selectedRecipeBoxIds : [],
         /* 
@@ -211,7 +220,7 @@ export default {
             moveStep=1 레시시 박스 편집 > 이동 화면
         */
         moveStep : 0,
-        recipeList : [],
+        recipeList : [],    // 전체 레시피 목록 데이터
         mainPicture : '',
         selectedRecipeIds : [],
         recipeIds : [],
@@ -221,14 +230,20 @@ export default {
         newBox : "",
         edit : '',
         tempBoxId : [],
-        recipeId: 0, // TODO: 부모로 부터 상속되어야 한다.
+        rcpId: 0, // TODO: 부모로 부터 상속되어야 한다.
         on: false,
-        // 더보기
-        boxesAll: {},    // 전체 데이터
+        // 편집 > 박스이동 더보기
+        // boxesAll: {},    // 전체 데이터
         boxes: {},       // 화면에 노출되는 데이터
         totBoxes: 0,     // 전체 데이터 수
         cntBoxes: 3,     // 화면에 노출할 데이터 수 (초기 세팅 = 3)
         dataFull: false,// 전체 데이터보다 많은 데이터 호출 여부
+        // 담긴 레시피 목록 더보기
+        // recipesAll: {},    // 전체 레시피 목록 데이터
+        recipes: {},       // 화면에 노출되는 데이터
+        totRecipes: 0,     // 전체 데이터 수
+        cntRecipes: 5,     // 화면에 노출할 데이터 수 (초기 세팅 = 5)
+        dataRcpFull: false,// 전체 데이터보다 많은 데이터 호출 여부
     }),
     created() {
         this.boxId = this.$route.params.boxId;
@@ -283,8 +298,9 @@ export default {
                         boxName: this.selectedRecipeBox.name?this.selectedRecipeBox.name:"기본박스",
                         boxId: this.selectedRecipeBox.id,
                         commentsNumber : 66   // TODO: comments
-                    })
-                });                 
+                    })             
+                });   
+                this.bindRecipes()
             }
         },
         setEmptyImg(e) {
@@ -498,8 +514,63 @@ export default {
             }
             this.step = 1
             this.moveStep = 0
-            //this.initialize();
+            //this.initialize();            
+            this.bindRecipes()
         },
+        bindBoxes() {
+            this.totBoxes = this.recipeBoxes.length;
+            let data = []
+            for(var i=0;i<this.cntBoxes;i++){
+                if(this.recipeBoxes[i])
+                    data.push(this.recipeBoxes[i])
+                else
+                    this.cntBoxes = i
+            }
+            this.boxes = data;
+        },
+        appendBoxes() {
+            if(this.cntBoxes < this.totBoxes){
+                this.cntBoxes += 3
+                let data = []
+                for(var i=0;i<this.cntBoxes;i++){
+                    if(this.recipeBoxes[i])
+                        data.push(this.recipeBoxes[i])
+                    else
+                        this.cntBoxes = i
+                }
+                this.boxes = data
+            }else{
+                this.dataFull = true
+                alert('List items are fully loaded!')
+            }
+        },
+        bindRecipes() {
+            this.totRecipes = this.recipeList.length;
+            let data = []
+            for(var i=0;i<this.cntRecipes;i++){
+                if(this.recipeList[i])
+                    data.push(this.recipeList[i])
+                else
+                    this.cntRecipes = i
+            }
+            this.recipes = data;
+        },
+        appendRecipes() {
+            if(this.cntRecipes < this.totRecipes){
+                this.cntRecipes += 5
+                let data = []
+                for(var i=0;i<this.cntRecipes;i++){
+                    if(this.recipeList[i])
+                        data.push(this.recipeList[i])
+                    else
+                        this.cntRecipes = i
+                }
+                this.recipes = data
+            }else{
+                this.dataRcpFull = true
+                alert('List items are fully loaded!')
+            }
+        }
     },
     components: {
         swiper,
@@ -526,31 +597,6 @@ export default {
                 this.selectedRecipeIds = e ? this.recipeIds : [];
             }
         },
-        bindBoxes() {
-            this.totBoxes = this.recipeBoxes.length;
-            let data = []
-            for(var i=0;i<this.cntBoxes;i++){
-                data.push(this.recipeBoxes[i])
-            }
-            this.boxes = data;
-        },
-        appendBoxes() {
-            if(this.cntBoxes < this.totBoxes){
-                this.cntBoxes += 3 // 노출 개수 3개 증가
-                let data = []
-                for(var i=0;i<this.cntBoxes;i++){
-                    if(this.recipeBoxes[i])
-                        data.push(this.recipeBoxes[i]) // 전체에서 노출 뉴스 개수만큼 데이터 추출하여 data 배열에 추가
-                    else
-                        this.cntBoxes = i
-                }
-                this.boxes = data // boxes 객체에 data 배열 업데이트
-            // 전체 개수와 노출되는 개수가 같으면
-            }else{
-                this.dataFull = true // dataFull 객체를 true 상태로 변경
-                alert('List items are fully loaded!') // 모든 데이터 출력 알림
-            }
-        }
     },
     mounted () {
         console.log("mounted");
