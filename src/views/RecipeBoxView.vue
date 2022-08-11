@@ -140,15 +140,24 @@
                     </div>
                     <div class="fr b color-grey2 margin-bottom-5" style="margin-top: -28px;" @click="addNewBoxPage()">{{ $t('button.addNewBox') }} +</div>
                 </div>
-                <div class="wrap_select">
-                    <ul v-for="(box, index) in recipeBoxes" :key="index">
+                <div class="wrap_select" id="more_list">
+                    <!-- <ul v-for="(box, index) in recipeBoxes.slice(0,3)" :key="index"> -->
+                    <ul v-for="(box, index) in boxes" :key="index">
                         <li class="menu fl"
                             :class="{on : tempBoxId.includes(box.id)}"
                             @click="callMoveRecipeBox(box.id)">
                             {{ box.name }}
                         </li>
                     </ul>
-                    <div class="arr_right">더보기</div>
+                    <div
+                        class="arr_right" 
+                        type="button"
+                        v-on:click="appendBoxes()"
+                        :disabled="this.dataFull === true"
+                        :class="{disabled : dataFull}"
+                    >
+                    더보기 ({{cntBoxes}}/{{totBoxes}})
+                    </div>
                 </div>
                 <div class="btn btn-default" style="width:112px;" @click="cancel">{{$t("button.cancel")}}</div>
             </div>
@@ -214,6 +223,12 @@ export default {
         tempBoxId : [],
         recipeId: 0, // TODO: 부모로 부터 상속되어야 한다.
         on: false,
+        // 더보기
+        boxesAll: {},    // 전체 데이터
+        boxes: {},       // 화면에 노출되는 데이터
+        totBoxes: 0,     // 전체 데이터 수
+        cntBoxes: 3,     // 화면에 노출할 데이터 수 (초기 세팅 = 3)
+        dataFull: false,// 전체 데이터보다 많은 데이터 호출 여부
     }),
     created() {
         this.boxId = this.$route.params.boxId;
@@ -231,7 +246,8 @@ export default {
             "get"
             );
             if (response.status === this.HTTP_OK) {
-                this.recipeBoxes = response.data;
+                this.recipeBoxes = response.data;                
+                this.bindBoxes()
             }
         },
         async getRecipeBoxById(id) {
@@ -509,6 +525,31 @@ export default {
             set: function(e) {
                 this.selectedRecipeIds = e ? this.recipeIds : [];
             }
+        },
+        bindBoxes() {
+            this.totBoxes = this.recipeBoxes.length;
+            let data = []
+            for(var i=0;i<this.cntBoxes;i++){
+                data.push(this.recipeBoxes[i])
+            }
+            this.boxes = data;
+        },
+        appendBoxes() {
+            if(this.cntBoxes < this.totBoxes){
+                this.cntBoxes += 3 // 노출 개수 3개 증가
+                let data = []
+                for(var i=0;i<this.cntBoxes;i++){
+                    if(this.recipeBoxes[i])
+                        data.push(this.recipeBoxes[i]) // 전체에서 노출 뉴스 개수만큼 데이터 추출하여 data 배열에 추가
+                    else
+                        this.cntBoxes = i
+                }
+                this.boxes = data // boxes 객체에 data 배열 업데이트
+            // 전체 개수와 노출되는 개수가 같으면
+            }else{
+                this.dataFull = true // dataFull 객체를 true 상태로 변경
+                alert('List items are fully loaded!') // 모든 데이터 출력 알림
+            }
         }
     },
     mounted () {
@@ -539,6 +580,15 @@ export default {
         },
         boxId(newValue){
             console.log("boxId: ", newValue)
+        },
+        cntBoxes(newValue){
+            console.log("cntBoxes:", newValue)
+        },
+        dataFull(newValue){
+            console.log("dataFull:", newValue)
+        },
+        boxes(newValue){
+            console.log("boxes:", newValue)
         }
     },
 }
