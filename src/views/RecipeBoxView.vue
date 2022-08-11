@@ -13,9 +13,16 @@
         </div>  
         <div class="wrap-boxes">
             <div class="boxes">
-                <swiper class="wrap_keywords" ref="filterSwiper" :options="swiperOption" role="tablist">
+                <swiper class="wrap_keywords" ref="filterSwiper" :options="swiperOption" role="tablist">                    
+                    <swiper-slide role="tab">
+                        <div class="keywords" 
+                            :class="{on : step==4}">
+                            <button @click="recipeAll()">모든 레시피</button>
+                        </div>
+                    </swiper-slide>
                     <swiper-slide role="tab" 
                         v-for="(item, index) in recipeBoxes"
+                        v-if="item.isDefault === false"
                         :key="index">
                         <div class="keywords" 
                                 :class="{on : selectedRecipeBoxIds.includes(item.id) || boxId == item.id}" 
@@ -42,7 +49,7 @@
                 <span hidden>선택된 레시피박스: {{ selectedRecipeBox.name }}[{{ selectedRecipeBox.id }}]</span>
             </div>
         </div>
-        <div v-if="step===1">
+        <div v-if="step===1" >
             <div class="wrap_allnum fl">
                 <span class="dp-inline-block fl">{{$t("content.all")}} </span>
                 <span class="num">{{ recipeList.length }}</span>
@@ -74,8 +81,9 @@
                 </div>
                 <div
                     type="button"
-                    v-on:click="appendRecipes()"
+                    v-on:click="appendRecipes(false)"
                     :disabled="this.dataRcpFull === true"
+                    :hidden="this.totRecipes == this.cntRecipes"
                     :class="{disabled : dataRcpFull}"
                 >
                 더보기 ({{cntRecipes}}/{{totRecipes}})
@@ -153,6 +161,7 @@
                     <!-- <ul v-for="(box, index) in recipeBoxes.slice(0,3)" :key="index"> -->
                     <ul v-for="(box, index) in boxes" :key="index">
                         <li class="menu fl"
+                            v-if="box.isDefault === false"
                             :class="{on : tempBoxId.includes(box.id)}"
                             @click="callMoveRecipeBox(box.id)">
                             {{ box.name }}
@@ -183,6 +192,49 @@
             <label id="result-label" hidden for="result"></label><br/>
             <div class="btn btn-default fl margin-bottom-40" @click="cancel">{{$t("button.cancel")}}</div>
             <div class="btn btn-default fl" @click="done">{{$t("button.done")}}</div>
+            </div>
+        </div>
+        <div v-if="step===4">
+            <div class="wrap_allnum fl">
+                <span class="dp-inline-block fl">{{$t("content.all")}} </span>
+                <span class="num">{{ recipeBoxes.length }}</span>
+            </div>
+            <div class="btn btn-default edit fr">
+                <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
+            </div>
+            <div class="wrap_recipes">
+                <div v-for="(box, index) in recipeBoxes" :key="index">
+                <div class="alltitle" v-if="box.isDefault===false">{{ box.name }}</div>
+                <div v-else><br/></div>
+                <div class="wrap_in" v-for="recipe in box.recipe" :key="recipe.id">
+                <router-link :to="'/recipedetail/'+recipe.recipeId">
+                    <div class="photo fl"><img :src="recipe.file"/></div>
+                    <div class="wrap_text fl">
+                        <div class="wrap_bullet">
+                            <span v-for="(period, idx) in $t('option.period')" :key="idx">
+                            <div class="squre4 fl" v-if="recipe.period == idx">{{ period[0] }}</div>
+                            </span>
+                            <div class="new2 fl" v-if="recipe.new"></div>
+                        </div>
+                        <div class="fr"></div>
+                        <div class="title">
+                            <div class="fl padding-right-10">{{ recipe.title }}</div>
+                            <span class="icon_reply fl"></span>
+                        </div>
+                        <div class="text">{{ recipe.subTitle }}</div>
+                    </div>
+                </router-link>
+                </div>
+                </div>
+                <div
+                    type="button"
+                    v-on:click="appendRecipes(true)"
+                    :disabled="this.dataRcpFull === true"
+                    :hidden="this.totRecipes == this.cntRecipes"
+                    :class="{disabled : dataRcpFull}"
+                >
+                더보기 ({{cntRecipes}}/{{totRecipes}})
+                </div>
             </div>
         </div>
     </main>
@@ -236,7 +288,7 @@ export default {
         // boxesAll: {},    // 전체 데이터
         boxes: {},       // 화면에 노출되는 데이터
         totBoxes: 0,     // 전체 데이터 수
-        cntBoxes: 3,     // 화면에 노출할 데이터 수 (초기 세팅 = 3)
+        cntBoxes: 4,     // 화면에 노출할 데이터 수 (초기 세팅 = 4) 기본박스 + 1
         dataFull: false,// 전체 데이터보다 많은 데이터 호출 여부
         // 담긴 레시피 목록 더보기
         // recipesAll: {},    // 전체 레시피 목록 데이터
@@ -351,6 +403,7 @@ export default {
         addNewBoxPage() {
             console.log("addNewBoxPage step=2")
             this.step = 3
+            this.boxId = 0
         },
         onSubmitForm(e) {
             console.log("onSubmitForm : "+e);
@@ -555,21 +608,33 @@ export default {
             }
             this.recipes = data;
         },
-        appendRecipes() {
+        appendRecipes(all) {
             if(this.cntRecipes < this.totRecipes){
                 this.cntRecipes += 5
                 let data = []
                 for(var i=0;i<this.cntRecipes;i++){
-                    if(this.recipeList[i])
+                    if(all){
+                        // TODO: 복잡하네...
+                        // recipeList 형식에 맞게 모든 레시피 목록을 따로 만들어 보낼까? 
+                        // recipeList 형식에 box.name 필요. 최신순 정렬 필요
+                        //this.recipeBoxes
+                        // data.push(this.recipeList[i])
+                    }
+                    if(this.recipeList[i]){
                         data.push(this.recipeList[i])
-                    else
+                    }else{
                         this.cntRecipes = i
+                    }
                 }
                 this.recipes = data
             }else{
                 this.dataRcpFull = true
                 alert('List items are fully loaded!')
             }
+        }, 
+        recipeAll() {
+            this.step = 4
+            this.boxId = 0
         }
     },
     components: {
