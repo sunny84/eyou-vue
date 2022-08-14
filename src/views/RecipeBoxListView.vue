@@ -1,193 +1,87 @@
 <template>
   <div>
     <main class="recipebox">
-    <!--HEADER-->
-    <h1 class="fl"><router-link :to="'/recipedetail/'+recipeId"><img src="@/assets/images/icon_back.png" alt="돌아가기" title="돌아가기"/></router-link>
-      <span class="color-orange padding-left-15">{{ $t("title.recipeBox") }}</span>
-    </h1>
-    <div class="wrap_menu">
-        <ul>
-            <li class="menu" :class="{on : this.$route.path == '/myrecipe'}" style="cursor: ponter;" onclick="location.href='/myrecipe';">{{ $t("menu.myRecipe") }}</li><!--<router-link :to="'/myrecipe'"></router-link>-->
-            <li class="menu" :class="{on : this.$route.path == '/recipeboxlist'}" style="cursor: ponter;" onclick="location.href='/recipeboxlist';">{{ $t("menu.savedRecipe") }}</li><!--<router-link :to="'/recipeboxlist'"></router-link>-->
-            <li class="menu" :class="{on : this.$route.path == '/todaySawRecipe'}" style="cursor: ponter;" onclick="location.href='/todaySawRecipe';">{{ $t("menu.historyRecipe") }}</li><!--<router-link :to="'#'"></router-link>-->
-        </ul>
-    </div>
-    <!--CONTENT-->
-    <div class="btn btn-default edit fr margin-bottom-20">
-      <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
-    </div>
-    {{ recipeBoxes.length }}
-    <!-- {{ recipeBoxes }}<br/>(0,1)
-    {{ recipeBoxes.slice(0,1) }}<br/>(1,2)
-    {{ recipeBoxes.slice(1,2) }}<br/>(2,3)
-    {{ recipeBoxes.slice(2,3) }}<br/>(3,4)
-    {{ recipeBoxes.slice(3,4) }}<br/>(4,5)
-    {{ recipeBoxes.slice(4,5) }}<br/>(5,6)
-    {{ recipeBoxes.slice(5,6) }}<br/>(6,7)
-    {{ recipeBoxes.slice(6,7) }}<br/> -->
-    <!--<div class="wrap_recipes">
-      <div class="row0" 
-          v-for="(box, $index) in recipeBoxes.slice(0,1)" :key="$index">
-        <div class="column1 full fl"
-          @click="callRecipeBox(box.id)">
-          <div class="wrap_row">
-            <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
-            <div class="title">{{ box.name }} {{ box.id }}</div>
-            <div class="new" v-if="box.new"></div>
-          </div>
-          //<div class="photo" v-for="(r, $index) in box.recipe.slice(0,4)" :key="$index">
-          <div class="photo" v-for="(r, $index) in box.recipe.slice(0,1)" :key="$index">
-            <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-            <img v-else class="pic" src="@/assets/emptyImg.png">
-          </div>
-        </div>
-        <div class="column1 fl"
-          @click="callRecipeBox(recipeBoxes[1].id)">
-          <div class="wrap_row">
-            <div class="circleNum">{{ recipeBoxes[1].recipe?box.recipe.length:0 }}</div>
-            <div class="title">{{ recipeBoxes[1].name }} {{ recipeBoxes[1].id }}</div>
-            <div class="new" v-if="recipeBoxes[1].new"></div>
-          </div>
-          //<div class="photo" v-for="(r, $index) in box.recipe.slice(0,4)" :key="$index">
-          <div class="wrap_photo" v-if="recipeBoxes[1].recipe">
-            <div class="photo" v-for="(r, $index) in box.recipe.slice(0,1)" :key="$index">
-              <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-              <img v-else class="pic" src="@/assets/emptyImg.png">
-            </div>
-          </div>
-          <div class="wrap_photo" v-else>
-            <div class="photo">
-              <img class="pic" src="@/assets/emptyImg.png">
-            </div>
-          </div>
-        </div>
+      <!--HEADER-->
+      <h1 class="fl"><router-link :to="'/recipedetail/'+recipeId"><img src="@/assets/images/icon_back.png" alt="돌아가기" title="돌아가기"/></router-link>
+        <span class="color-orange padding-left-15">{{ $t("title.recipeBox") }}</span>
+      </h1>
+      <div class="wrap_menu">
+          <ul>
+              <li class="menu" :class="{on : this.$route.path == '/myrecipe'}" style="cursor: ponter;" onclick="location.href='/myrecipe';">{{ $t("menu.myRecipe") }}</li><!--<router-link :to="'/myrecipe'"></router-link>-->
+              <li class="menu" :class="{on : this.$route.path == '/recipeboxlist'}" style="cursor: ponter;" onclick="location.href='/recipeboxlist';">{{ $t("menu.savedRecipe") }}</li><!--<router-link :to="'/recipeboxlist'"></router-link>-->
+              <li class="menu" :class="{on : this.$route.path == '/todaySawRecipe'}" style="cursor: ponter;" onclick="location.href='/todaySawRecipe';">{{ $t("menu.historyRecipe") }}</li><!--<router-link :to="'#'"></router-link>-->
+          </ul>
       </div>
-      //<div class="row0">
-        <div class="column1 full fl"
-          @click="callRecipeBox(recipeBoxes[2].id)">
-          <div class="wrap_row">
-            <div class="circleNum">{{ recipeBoxes[2].recipe?box.recipe.length:0 }}</div>
-            <div class="title">{{ recipeBoxes[2].name }} {{ recipeBoxes[2].id }}</div>
-            <div class="new" v-if="recipeBoxes[2].new"></div>
-          </div>
-          <div class="photo" v-for="(r, $index) in recipeBoxes[2].recipe.slice(0,1)" :key="$index">
-            <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-            <img v-else class="pic" src="@/assets/emptyImg.png">
-          </div>
-        </div>
-        <div class="column1 full fl"
-          @click="callRecipeBox(recipeBoxes[3].id)">
-          <div class="wrap_row">
-            <div class="circleNum">{{ recipeBoxes[3].recipe?box.recipe.length:0 }}</div>
-            <div class="title">{{ recipeBoxes[3].name }} {{ recipeBoxes[3].id }}</div>
-            <div class="new" v-if="recipeBoxes[3].new"></div>
-          </div>
-          <div class="wrap_photo" v-if="recipeBoxes[3].recipe">
-            <div class="photo" v-for="(r, $index) in box.recipe.slice(0,1)" :key="$index">
-              <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-              <img v-else class="pic" src="@/assets/emptyImg.png">
-            </div>
-          </div>
-          <div class="wrap_photo" v-else>
-            <div class="photo">
-              <img class="pic" src="@/assets/emptyImg.png">
-            </div>
-          </div>
-        </div>
+      <!--CONTENT-->
+      <div class="btn btn-default edit fr margin-bottom-20">
+        <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
       </div>
-    </div>--><!-- FIXME: slice(0,1) 만 나오고 recipeBoxes 했을 때는 왜 안나오지? -->
-    <div class="wrap_recipes">
-      <div class="row0">
-        <div class="column1 full fl" 
-          v-for="(box, i1) in recipeBoxes.slice(0,1)" :key="i1"
-          @click="callRecipeBox(box.id)"
-        >
-          <div class="wrap_row">
-            <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
-            <div class="title">{{ box.name }}</div>
-            <div class="new" v-if="box.new"></div>
+      <!-- <BoxListView :key="listView"></BoxListView> -->
+      <div class="wrap_recipes">
+          <div class="row0">
+              <div class="column1 full fl" 
+              v-for="(box, $index) in allBoxInfo" :key="$index"
+              @click="callRecipeBox(0)"
+              >
+                  <div>
+                      <div class="wrap_row">
+                          <div class="circleNum">{{ box.recipeCnt }}</div>
+                          <div class="title">{{ box.name }}</div>
+                          <div class="new" v-if="box.new"></div>
+                      </div>
+                      <div v-if="box.thumbnails">
+                          <div class="photo" v-for="(img, $i) in box.thumbnails.slice(0,4)" :key="$i">
+                              <img v-if="img.mainImgId != null" class="pic" :src="getImgURL(img.mainImgId)" @error="setEmptyImg">
+                              <img v-else class="pic" src="@/assets/emptyImg.png">
+                          </div>
+                      </div>
+                      <div v-else>
+                          <div class="photo">
+                              <img class="pic" src="@/assets/emptyImg.png">
+                              <img class="pic" src="@/assets/emptyImg.png">
+                              <img class="pic" src="@/assets/emptyImg.png">
+                              <img class="pic" src="@/assets/emptyImg.png">
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="column1 fl" 
+              v-for="(box, $index) in boxList" :key="$index"
+              @click="callRecipeBox(box.id)"
+              >
+                  <div v-if="!box.isDefault && box.recipe"><!-- 빈 박스(폴더)는 비활성화 -->
+                      <div class="wrap_row">
+                          <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
+                          <div class="title">{{ box.name }}</div>
+                          <div class="new" v-if="box.new"></div>
+                      </div>
+                      <div v-if="box.recipe">
+                          <div class="photo" v-for="(r, $i) in box.recipe.slice(0,1)" :key="$i">
+                              <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
+                              <img v-else class="pic" src="@/assets/emptyImg.png">
+                          </div>
+                      </div>
+                  </div>
+              </div>
           </div>
-          <div class="photo" v-for="(r, i) in box.recipe.slice(0,4)" :key="i">
-            <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-            <img v-else class="pic" src="@/assets/emptyImg.png">
-          </div>
-        </div>
-        <div class="column1 fl" v-for="(box, i2) in recipeBoxes.slice(1,2)" :key="i2"
-          @click="callRecipeBox(box.id)">
-          <div class="wrap_row">
-            <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
-            <div class="title">{{ box.name }}</div>
-            <div class="new" v-if="box.new"></div>
-          </div>
-          <div class="photo" v-for="(r, i) in box.recipe.slice(0,1)" :key="i">
-            <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-            <img v-else class="pic" src="@/assets/emptyImg.png">
-          </div>
-        </div>
       </div>
-      <div class="row0">
-        <div class="column1 fl" v-for="(box, i3) in recipeBoxes.slice(2,3)" :key="i3"
-          @click="callRecipeBox(box.id)">
-          <div class="wrap_row">
-            <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
-            <div class="title">{{ box.name }}</div>
-            <div class="new" v-if="box.new"></div>
+      <div class="wrap_recipes">
+          <div class="row0">
+              <div class="column1 new fl" v-on:click.capture="addNewBox(boxName)">
+                  <div class="wrap_row">
+                      <div class="title">{{ $t('content.newBox') }}</div>
+                  </div>
+                  <div class="photo">
+                      <img src="@/assets/images/icon_plus.png" alt="새로운 박스"/>
+                  </div>
+              </div>
           </div>
-          <div class="photo" v-for="(r, i) in box.recipe.slice(0,1)" :key="i">
-            <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-            <img v-else class="pic" src="@/assets/emptyImg.png">
-          </div>
-        </div>
-        <div class="column1 fl" v-for="(box, i4) in recipeBoxes.slice(3,4)" :key="i4"
-          @click="callRecipeBox(box.id)">
-          <div class="wrap_row">
-            <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
-            <div class="title">{{ box.name }}</div>
-            <div class="new" v-if="box.new"></div>
-          </div>
-          <div class="photo" v-for="(r, i) in box.recipe.slice(0,1)" :key="i">
-            <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-            <img v-else class="pic" src="@/assets/emptyImg.png">
-          </div>
-        </div>
-      </div><!-- 
-      <div class="row0">
-        <div class="column1 fl" v-for="(box, i5) in recipeBoxes.slice(4,5)" :key="i5"
-          @click="callRecipeBox(box.id)">
-          <div class="wrap_row">
-            <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
-            <div class="title">{{ box.name }}</div>
-            <div class="new" v-if="box.new"></div>
-          </div>
-          <div class="photo" v-for="(r, i) in box.recipe.slice(0,1)" :key="i">
-            <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-            <img v-else class="pic" src="@/assets/emptyImg.png">
-          </div>
-        </div>
-        <div class="column1 fl" v-for="(box, i6) in recipeBoxes.slice(6,7)" :key="i6"
-          @click="callRecipeBox(box.id)">
-          <div class="wrap_row">
-            <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
-            <div class="title">{{ box.name }}</div>
-            <div class="new" v-if="box.new"></div>
-          </div>
-          <div class="photo" v-for="(r, i) in box.recipe.slice(0,1)" :key="i">
-            <img v-if="r.mainImgId != null" class="pic" :src="getImgURL(r.mainImgId)" @error="setEmptyImg">
-            <img v-else class="pic" src="@/assets/emptyImg.png">
-          </div>
-        </div>
-      </div> -->
-      <div class="row0">
-        <div class="column1 new fl" v-on:click.capture="addNewBox(boxName)">
-          <div class="wrap_row">
-            <div class="title">{{ $t('content.newBox') }}</div>
-          </div>
-          <div class="photo">
-            <img src="@/assets/images/icon_plus.png" alt="새로운 박스"/>
-          </div>
-        </div>
       </div>
-    </div><!--wrap_recipes-->
+      <div>
+        <infinite-loading @infinite="infiniteHandler">
+            <div slot="no-more"><br/></div>
+        </infinite-loading>
+      </div>
     </main>
     <!--FOOTER-->
   </div>
@@ -196,19 +90,22 @@
 <script>
 import emptyImg from '@/assets/emptyImg.png'
 import ConfirmInput from 'vue-confirm-input'
+import InfiniteLoading from 'vue-infinite-loading';
 
 export default {
   name : "RecipeBoxListView",
   data: ()=>({
+    page : 0,
+    boxList : [],
     recipeBoxes : [],
-    tempBoxes : [],
-    mainPicture : '',
+    allBoxInfo : [],
     boxName: '기본박스',
     recipeId: 0,
     isActive: false,
   }),
 
   computed: {
+    // ...mapGetters('box', ['listView']),
     reversedMesage: {
       get() {
         return this.boxName.split('').reverse().join('')
@@ -221,15 +118,6 @@ export default {
   },
 
   watch: {
-    boxName(newValue) {
-      console.log('msg:', newValue)
-    },
-    reversedMesage(newValue) {
-      console.log('reversedMessage:', newValue)
-    },
-    recipeBoxes(newValue) {
-      console.log('recipeBoxes:', newValue)
-    }
   }, 
 
   created() {
@@ -241,22 +129,70 @@ export default {
   },
 
   components: {
-      ConfirmInput
-  },
+    ConfirmInput,
+    InfiniteLoading
+},
 
   methods: {
     initialize() {
       this.getRecipeBoxAll();
     },
-
-    async getRecipeBoxAll() {      
-      const response = await this.$api(
-        `${this.$API_SERVER}/api/recipebox/mine`,
-        "get"
-      );
+    
+    async getRecipeBoxAll() {
+      let params = '';
+        // params += `?page=${this.page}`;
+        // params += '&sort=createdAt,DESC';
+      const response = await this.$api(`${this.$API_SERVER}/api/reciperecipebox/recipe/mine`+params, "get");
       if (response.status === this.HTTP_OK) {
+        this.allBoxInfo = []
         this.recipeBoxes = response.data;
-        console.log(this.recipeBoxes);
+
+        let recipeCnt = 0
+        let thumbnails = []
+        let newFlag = false
+        this.recipeBoxes.forEach(box => {
+          if(box.recipe){
+              box.recipe.forEach(recipe => {
+              recipeCnt = recipeCnt + 1
+              if(recipe.mainImgId) thumbnails.push({"mainImgId": recipe.mainImgId})
+              if(recipe.new) newFlag = true
+            });
+          }
+        });
+        this.allBoxInfo.push({
+          'name': '모든 레시피',
+          'recipeCnt': recipeCnt,
+          'thumbnails': thumbnails,
+          'new': newFlag,
+          'recipeBoxes': this.recipeBoxes
+          });
+        // console.log(this.allBoxInfo)
+      }
+    },
+
+    async infiniteHandler($state){
+      let params = `page=${this.page}`;
+        // params += '&sort=createdAt,DESC';
+      console.log(params);
+      const response = await this.$api(`${this.$API_SERVER}/api/recipebox/mine?`+params, `get`);
+      if (response.status === this.HTTP_OK) {
+        if(response.data.length){
+          console.log(response.data);
+          for(const data of response.data){
+            this.boxList.push(data);
+            // this.setAllBoxInfo();
+          }          
+          this.page++;
+          $state.loaded();
+          if(response.data.length / 2 < 1){
+            $state.complete();
+          }
+        }else{
+          $state.complete();
+        }
+      }else{
+        console.log(response.status);
+        $state.complete();
       }
     },
 
