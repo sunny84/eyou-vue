@@ -19,7 +19,7 @@
                     <swiper-slide role="tab">
                         <div class="keywords" 
                             :class="{on : step==4 && boxId == 'all'}">
-                            <button @click="callAllSelect()">모든 레시피</button>
+                            <button @click="callAllList()">모든 레시피</button>
                         </div>
                     </swiper-slide>
                     <swiper-slide role="tab" 
@@ -106,7 +106,7 @@
                 <div class="fl" v-on:click="on = !on">
                     <span class="select dp-inline-block fl margin-right-5" 
                         :class="{on : on}" 
-                        @click="callAllSelect"
+                        @click="callAllSelect()"
                     />
                     <span class="dp-inline-block">{{$t("content.selectAll")}}</span>
                 </div>
@@ -119,7 +119,8 @@
             </div>
             <div class="wrap_recipes">
                 <div class="alltitle hidden">{{ selectedRecipeBox.name }}</div>
-                <div class="wrap_in" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index">
+                <!-- <div class="wrap_in" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index"> -->
+                    <div class="wrap_in" v-for="(recipe, $index) in recipes" :key="$index">
                     <div class="photo fl">
                         <img :src="getImgURL(recipe.mainImgId)"/>
                     </div>
@@ -621,17 +622,18 @@ export default {
             console.log("Edit");
             this.step = 2
         },
-        callAllSelect() {
+        callAllList() {
+            this.boxId = 'all'
+            this.step=4
+            // location.href=`/recipebox/all`;
+        },
+        callAllSelect(){
             this.selectedRecipeIds = []
             if(!this.on){
                 this.recipeList.forEach((recipe, index, arr) => {
                     this.selectedRecipeIds.push(recipe.recipeId)
                 });
             }
-            this.boxId = 'all'
-            this.step=4
-            // location.href=`/recipebox/all`;
-
         },
         callMoveRecipe() {
             console.log("Move")
