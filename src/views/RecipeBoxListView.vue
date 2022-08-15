@@ -21,7 +21,7 @@
           <div class="row0">
               <div class="column1 full fl" 
               v-for="(box, $index) in allBoxInfo" :key="$index"
-              @click="callRecipeBox(0)"
+              @click="callRecipeBox('all')"
               >
                   <div>
                       <div class="wrap_row">
@@ -50,6 +50,7 @@
               @click="callRecipeBox(box.id)"
               >
                   <div v-if="!box.isDefault && box.recipe"><!-- 빈 박스(폴더)는 비활성화 -->
+                  <div v-if="box.recipe.length > 0">
                       <div class="wrap_row">
                           <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
                           <div class="title">{{ box.name }}</div>
@@ -61,6 +62,7 @@
                               <img v-else class="pic" src="@/assets/emptyImg.png">
                           </div>
                       </div>
+                  </div>
                   </div>
               </div>
           </div>
@@ -77,11 +79,11 @@
               </div>
           </div>
       </div>
-      <div>
+      <!-- <div>
         <infinite-loading @infinite="infiniteHandler">
             <div slot="no-more"><br/></div>
         </infinite-loading>
-      </div>
+      </div> -->
     </main>
     <!--FOOTER-->
   </div>
@@ -91,21 +93,25 @@
 import emptyImg from '@/assets/emptyImg.png'
 import ConfirmInput from 'vue-confirm-input'
 import InfiniteLoading from 'vue-infinite-loading';
+import { mapActions } from "vuex";
 
 export default {
   name : "RecipeBoxListView",
   data: ()=>({
     page : 0,
-    boxList : [],
-    recipeBoxes : [],
-    allBoxInfo : [],
+    boxList : [],       // 화면에 보여줄 담은 레시피 목록
+    recipeBoxes : [],   // 서버로 부터 얻어온 담은 레시피 목록
+    allBoxInfo : [],    // 모아 보기
     boxName: '기본박스',
     recipeId: 0,
-    isActive: false,
   }),
 
+  components: {
+    ConfirmInput,
+    InfiniteLoading
+  },
+
   computed: {
-    // ...mapGetters('box', ['listView']),
     reversedMesage: {
       get() {
         return this.boxName.split('').reverse().join('')
@@ -117,9 +123,6 @@ export default {
     }
   },
 
-  watch: {
-  }, 
-
   created() {
     this.initialize();
   },
@@ -128,12 +131,13 @@ export default {
     this.$checkToken('recipeboxlist');
   },
 
-  components: {
-    ConfirmInput,
-    InfiniteLoading
-},
+  watch: {
+  }, 
 
   methods: {
+    // ...mapMutations('box', ['setStep','setBoxId', 'setAllBoxInfo']),
+    ...mapActions('box', ['setStep','setBoxId', 'setAllBox']),
+
     initialize() {
       this.getRecipeBoxAll();
     },
@@ -145,6 +149,7 @@ export default {
       const response = await this.$api(`${this.$API_SERVER}/api/reciperecipebox/recipe/mine`+params, "get");
       if (response.status === this.HTTP_OK) {
         this.allBoxInfo = []
+        // this.setAllBoxInfo(allBoxInfo)
         this.recipeBoxes = response.data;
 
         let recipeCnt = 0
@@ -166,7 +171,9 @@ export default {
           'new': newFlag,
           'recipeBoxes': this.recipeBoxes
           });
-        // console.log(this.allBoxInfo)
+        this.boxList = this.recipeBoxes
+        console.log(this.allBoxInfo)
+        this.setAllBox(this.allBoxInfo)
       }
     },
 
@@ -180,7 +187,7 @@ export default {
           console.log(response.data);
           for(const data of response.data){
             this.boxList.push(data);
-            // this.setAllBoxInfo();
+            // this.setAllBoxInfo(data);
           }          
           this.page++;
           $state.loaded();
@@ -226,16 +233,6 @@ export default {
     setEmptyImg(e) {
       e.target.src=emptyImg;
     },
-    
-    async getFileId(id){
-        const response = await this.$api(
-          `${this.$API_SERVER}/file?contentsId=${id}`,
-          "get"
-        );
-        if (response.status === this.HTTP_OK) {
-            console.log(response.data);
-        }
-    },
 
     getImgURL(id) {
       const url = `${this.$API_SERVER}/file/download/thumbnail?fileId=` + id;
@@ -244,43 +241,22 @@ export default {
     },
 
     callRecipeBox(id) {
-        location.href=`/recipebox/${id}`;
-    },
+      this.setBoxId(id)
+      this.setStep(4)
+      // this.$store.commit('box/setAllBoxInfo', this.allBoxInfo);
+      // this.$store.commit('box/setBoxId', id);
+      // if(id == 'all'){
+      //   this.$store.commit('box/setStep', 4)
+      // }
+      // else{
+      //   this.$store.commit('box/setStep', 1)
+      // }
+      location.href=`/recipebox/${id}`;
 
-    activate() {
-      this.isActive = !this.isActive
-    }
+    },
   },
 }
 </script>
 
 <style scoped>
-/* button
-{
-    background: inherit ; 
-    border:none; 
-    box-shadow:none; 
-    border-radius:0; 
-    padding:0; 
-    overflow:visible; 
-    cursor:pointer
-}
-ul {
-    list-style: none;
-}
-li {
-    float: left;
-} */
-.active {
-  color: orange;
-}
-/* 
-main.recipebox .wrap_recipes .column1.on {width: 50%; }
-main.recipebox .wrap_recipes .column1.on .wrap_row {height:24px;}
-main.recipebox .wrap_recipes .column1.on .wrap_row .circleNum {position: absolute; margin-top:-7px; z-index: 99999; border-radius: 10px;width:20px;background-color:#FF9519; color: #fff;text-align: center; font-weight: 600;}
-main.recipebox .wrap_recipes .column1.on .wrap_row .title     {float: left; z-index: -1;border: 3px #FF9519 solid; border-bottom: none; border-radius: 10px 10px 0 0; padding:0 5px 0 6px; margin-left:13px;background-color:#fff; color: #FF9519;text-align: center;}
-main.recipebox .wrap_recipes .column1.on .wrap_row .new       {float: left;margin-top:5px; background: url(../images/bul-new.png)50% 50% no-repeat;width:35px;height: 16px;display:block;}
-main.recipebox .wrap_recipes .column1.on .photo     {padding: 0;margin: 0 10px 0 0; display:block; border: 3px #FF9519 solid; border-radius: 5px; box-shadow: 2px 2px 2px 0 #ccc;}
-main.recipebox .wrap_recipes .column1.on .photo img {width: 100%; height: 100%;}
-*/
 </style>

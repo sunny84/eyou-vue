@@ -6,50 +6,59 @@
         </h1>
         <div class="wrap_menu">
             <ul>
-                <li class="menu" style="cursor: ponter;" onclick="location.href='/myrecipe';">{{ $t("menu.myRecipe") }}</li>
-                <li class="menu on" style="cursor: ponter;" onclick="location.href='/recipeboxlist';">{{ $t("menu.savedRecipe") }}</li>
-                <li class="menu" style="cursor: ponter;" onclick="location.href='';">{{ $t("menu.historyRecipe") }}</li>
+                <li class="menu" :class="{on : this.$route.path == '/myrecipe'}" style="cursor: ponter;" onclick="location.href='/myrecipe';">{{ $t("menu.myRecipe") }}</li><!--<router-link :to="'/myrecipe'"></router-link>-->
+                <li class="menu" :class="{on : this.$route.path == '/recipebox/'+boxId || 'all'}" style="cursor: ponter;" onclick="location.href='/recipebox/all';">{{ $t("menu.savedRecipe") }}</li><!--<router-link :to="'/recipeboxlist'"></router-link>-->
+                <li class="menu" :class="{on : this.$route.path == '/todaySawRecipe'}" style="cursor: ponter;" onclick="location.href='/todaySawRecipe';">{{ $t("menu.historyRecipe") }}</li><!--<router-link :to="'#'"></router-link>-->
             </ul>
-        </div>  
+        </div>
+        <!-- <BoxKeywordView :key="listView"></BoxKeywordView> -->
+        <span hidden>{{ step }} {{ boxId }}</span>
         <div class="wrap-boxes">
             <div class="boxes">
                 <swiper class="wrap_keywords" ref="filterSwiper" :options="swiperOption" role="tablist">                    
                     <swiper-slide role="tab">
                         <div class="keywords" 
-                            :class="{on : step==4}">
-                            <button @click="recipeAll()">모든 레시피</button>
+                            :class="{on : step==4 && boxId == 'all'}">
+                            <button @click="callAllSelect()">모든 레시피</button>
                         </div>
                     </swiper-slide>
                     <swiper-slide role="tab" 
-                        v-for="(item, index) in recipeBoxes"
-                        v-if="item.isDefault === false"
-                        :key="index">
+                        v-for="(box, $index) in recipeBoxes"
+                        v-if="box.isDefault === false"
+                        :key="$index">
                         <div class="keywords" 
-                                :class="{on : selectedRecipeBoxIds.includes(item.id) || boxId == item.id}" 
-                                @click="setSelectedRecipeBox(item.id)">
+                                :class="{on : selectedRecipeBoxIds.includes(box.id) || boxId == box.id}" 
+                                @click="setSelectedRecipeBox(box.id)">
                             <span>
-                                {{item.name}}
+                                {{box.name}}
                             </span>
                         </div>
                     </swiper-slide>
                     <swiper-slide role="tab">
                         <div class="keywords" 
-                            :class="{on : step==3}">
+                            :class="{on : step==3 || boxId == 'new'}">
                             <button @click="addNewBoxPage()">{{ $t('button.addNewBox') }} +</button>
                         </div>
                     </swiper-slide>
                 </swiper>
-                <!-- <div class="wrapper">
+                <!-- ////<div class="wrapper">
                 <div class="swiper-pagination" slot="pagination"></div>
                 <div class="swiper-button-prev" slot="button-prev"></div>
                 <div class="swiper-button-next" slot="button-next"></div>
+                </div>//// -->
+                <!-- <div>
+                ////<infinite-loading @infinite="infiniteHandler"> -->
+                <!-- <infinite-loading @infinite="getRecipeBoxList">
+                    <div slot="no-more"><br/></div>
+                </infinite-loading>
                 </div> -->
             </div>
             <div>
                 <span hidden>선택된 레시피박스: {{ selectedRecipeBox.name }}[{{ selectedRecipeBox.id }}]</span>
             </div>
         </div>
-        <div v-if="step===1" >
+        <div v-if="step===1 || step===0" >
+            <!-- <BoxReipeView :boxId="selectedRecipeBox.id"></BoxReipeView> -->
             <div class="wrap_allnum fl">
                 <span class="dp-inline-block fl">{{$t("content.all")}} </span>
                 <span class="num">{{ recipeList.length }}</span>
@@ -59,10 +68,9 @@
             </div>
             <div class="wrap_recipes">
                 <div class="alltitle">{{ selectedRecipeBox.name }}</div>
-                <!-- <div class="wrap_in" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index"> -->
                 <div class="wrap_in" v-for="(recipe, index) in recipes" :key="index">
                 <router-link :to="'/recipedetail/'+recipe.recipeId">
-                    <div class="photo fl"><img :src="recipe.file"/></div>
+                    <div class="photo fl"><img :src="getImgURL(recipe.mainImgId)"/></div>
                     <div class="wrap_text fl">
                         <div class="wrap_bullet">
                             <span v-for="(period, idx) in $t('option.period')" :key="idx">
@@ -79,7 +87,10 @@
                     </div>
                 </router-link>
                 </div>
-                <div
+                <!-- ////<infinite-loading @infinite="getRecipeRecipeBoxList(boxId)">
+                    <div slot="no-more"><br/></div>
+                 </infinite-loading>//// -->
+                <!-- <div
                     type="button"
                     v-on:click="appendRecipes(false)"
                     :disabled="this.dataRcpFull === true"
@@ -87,7 +98,7 @@
                     :class="{disabled : dataRcpFull}"
                 >
                 더보기 ({{cntRecipes}}/{{totRecipes}})
-                </div>
+                </div> -->
             </div>
         </div>
         <div v-if="step===2">
@@ -110,7 +121,7 @@
                 <div class="alltitle hidden">{{ selectedRecipeBox.name }}</div>
                 <div class="wrap_in" v-for="(recipe, index) in recipeList.slice(0,5)" :key="index">
                     <div class="photo fl">
-                        <img :src="recipe.file"/>
+                        <img :src="getImgURL(recipe.mainImgId)"/>
                     </div>
                     <div class="wrap_text fl">
                         <div class="wrap_bullet">
@@ -158,7 +169,6 @@
                     <div class="fr b color-grey2 margin-bottom-5" style="margin-top: -28px;" @click="addNewBoxPage()">{{ $t('button.addNewBox') }} +</div>
                 </div>
                 <div class="wrap_select" id="more_list">
-                    <!-- <ul v-for="(box, index) in recipeBoxes.slice(0,3)" :key="index"> -->
                     <ul v-for="(box, index) in boxes" :key="index">
                         <li class="menu fl"
                             v-if="box.isDefault === false"
@@ -195,26 +205,30 @@
             </div>
         </div>
         <div v-if="step===4">
+            <!-- <BoxReipeView :boxId="boxId"></BoxReipeView> -->
             <div class="wrap_allnum fl">
                 <span class="dp-inline-block fl">{{$t("content.all")}} </span>
-                <span class="num">{{ recipeBoxes.length }}</span>
+                <span class="num" v-for="(box, $index) in allBoxInfo" :key="$index">{{ box.recipeCnt }}</span>
             </div>
             <div class="btn btn-default edit fr">
                 <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
             </div>
             <div class="wrap_recipes">
-                <div v-for="(box, index) in recipeBoxes" :key="index">
-                <div class="alltitle" v-if="box.isDefault===false">{{ box.name }}</div>
-                <div v-else><br/></div>
+                <div v-for="(box, $index) in recipeBoxes" :key="$index">
+                <div class="alltitle" v-if="box.isDefault===false && box.recipe && box.recipe.length > 0">{{ box.name }}</div>
+                <div v-else-if="box.isDefault===true"><br/></div><!-- 기본 박스 -->
+                <div v-else-if="box.recipe?false:true"></div><!-- 빈 폴더(박스) 비활성화 -->
+                <div v-else></div>
                 <div class="wrap_in" v-for="recipe in box.recipe" :key="recipe.id">
                 <router-link :to="'/recipedetail/'+recipe.recipeId">
-                    <div class="photo fl"><img :src="recipe.file"/></div>
+                    <div class="photo fl"><img :src="getImgURL(recipe.mainImgId)"/></div>
                     <div class="wrap_text fl">
                         <div class="wrap_bullet">
                             <span v-for="(period, idx) in $t('option.period')" :key="idx">
                             <div class="squre4 fl" v-if="recipe.period == idx">{{ period[0] }}</div>
                             </span>
                             <div class="new2 fl" v-if="recipe.new"></div>
+                            <!-- <div class="alltitle fl" v-if="box.isDefault===false">{{ box.name }}</div> -->
                         </div>
                         <div class="fr"></div>
                         <div class="title">
@@ -225,8 +239,9 @@
                     </div>
                 </router-link>
                 </div>
+            
                 </div>
-                <div
+                <!-- <div
                     type="button"
                     v-on:click="appendRecipes(true)"
                     :disabled="this.dataRcpFull === true"
@@ -234,7 +249,10 @@
                     :class="{disabled : dataRcpFull}"
                 >
                 더보기 ({{cntRecipes}}/{{totRecipes}})
-                </div>
+                </div> -->
+                <!--////<infinite-loading @infinite="getRecipeBoxList">
+                    <div slot="no-more"><br/></div>
+                </infinite-loading>//// -->
             </div>
         </div>
     </main>
@@ -244,6 +262,10 @@
 import emptyImg from '@/assets/emptyImg.png'
 import { swiper, swiperSlide } from "vue-awesome-swiper";
 import "swiper/dist/css/swiper.min.css";
+import { mapGetters, mapActions } from "vuex";
+import BoxKeywordView from '@/components/BoxKeywordView.vue';
+import InfiniteLoading from 'vue-infinite-loading';
+import BoxReipeView from '@/components/BoxReipeView.vue';
 
 export default {
     name : "RecipeBoxView",
@@ -266,7 +288,7 @@ export default {
             step=2 레시피 박스 편집 화면
             step=3 새 레시피 박스 입력 화면
         */
-        step : 1,
+        step : 0,
         /* 
             moveStep=0 레시피 박스 편집 화면
             moveStep=1 레시시 박스 편집 > 이동 화면
@@ -296,27 +318,100 @@ export default {
         totRecipes: 0,     // 전체 데이터 수
         cntRecipes: 5,     // 화면에 노출할 데이터 수 (초기 세팅 = 5)
         dataRcpFull: false,// 전체 데이터보다 많은 데이터 호출 여부
+        page : 0,
+        allBoxInfo: []
     }),
-    created() {
-        this.boxId = this.$route.params.boxId;
-        this.initialize();
-    },
-    methods : {
-        initialize() {
-            this.getRecipeBoxById(this.boxId);
-            this.getRecipeBoxList();
-            this.getRecipeRecipeBoxList(this.boxId);
+    
+    components: {
+    swiper,
+    swiperSlide,
+    InfiniteLoading,
+    BoxKeywordView,
+    BoxReipeView
+},    
+
+    computed: {
+        swiper() {
+            console.log("computed:swiper");
+            return this.$refs.filterSwiper.swiper;
         },
-        async getRecipeBoxList() {            
-            const response = await this.$api(
-            `${this.$API_SERVER}/api/recipebox/mine`,
-            "get"
-            );
-            if (response.status === this.HTTP_OK) {
-                this.recipeBoxes = response.data;                
-                this.bindBoxes()
+
+        allSelected: {
+            get: function() {
+                this.recipeIds = []
+                this.recipeList.slice(0,5).forEach((recipe) => {
+                    this.recipeIds.push(recipe.recipeId)
+                })
+                return this.recipeIds.length === this.selectedRecipeIds.length;
+            },
+            set: function(e) {
+                this.selectedRecipeIds = e ? this.recipeIds : [];
             }
         },
+    },
+
+    created() {
+        this.boxId = this.$route.params.boxId
+        this.initialize();
+    },
+
+    mounted () {
+        console.log("mounted");
+    },
+
+    watch: {
+        boxId(boxId) {            
+            this.getRecipeBoxById(boxId)
+            this.getRecipeRecipeBoxList(boxId)
+        }
+    },
+
+    methods : {
+        ...mapActions('box', ['setStep','setBoxId', 'setAllBox', 'setSelectedRBox']),
+        initialize(){
+            this.getRecipeBoxAll()
+            if(this.boxId == 'all'){ 
+                this.step = 4
+            } else{
+                this.getRecipeBoxById(this.boxId)
+                this.getRecipeRecipeBoxList(this.boxId)
+            }
+        },
+        
+        async getRecipeBoxAll() {
+            let params = '';
+                // params += `?page=${this.page}`;
+                // params += '&sort=createdAt,DESC';
+            const response = await this.$api(`${this.$API_SERVER}/api/reciperecipebox/recipe/mine`+params, "get");
+            if (response.status === this.HTTP_OK) {
+                this.allBoxInfo = []
+                this.recipeBoxes = response.data;
+                console.log("getRecipeBoxAll:",this.recipeBoxes)
+
+                let recipeCnt = 0
+                let thumbnails = []
+                let newFlag = false
+                this.recipeBoxes.forEach(box => {
+                    if(box.recipe){
+                        box.recipe.forEach(recipe => {
+                            recipeCnt = recipeCnt + 1
+                            if(recipe.mainImgId) thumbnails.push({"mainImgId": recipe.mainImgId})
+                            if(recipe.new) newFlag = true
+                        });
+                    }
+                });
+                this.allBoxInfo.push({
+                    'name': '모든 레시피',
+                    'recipeCnt': recipeCnt,
+                    'thumbnails': thumbnails,
+                    'new': newFlag,
+                    'recipeBoxes': this.recipeBoxes
+                });
+                this.bindBoxes()
+                console.log(this.allBoxInfo)
+            }
+        },
+        
         async getRecipeBoxById(id) {
             const response = await this.$api(
             `${this.$API_SERVER}/api/recipebox/${id}`,
@@ -326,14 +421,66 @@ export default {
                 this.selectedRecipeBox = response.data;
             }
         },
-        async getRecipeRecipeBoxList(id) {
-            this.recipeList = [];
-            const response = await this.$api(
-            `${this.$API_SERVER}/api/reciperecipebox/recipe`,
-            "get",
-            {box: id}
-            );            
+        
+        async getRecipeRecipeBoxList($state) {    
+            let params = `?page=${this.page}`;
+                // params += '&sort=createdAt,DESC';
+            console.log(params);
+            this.recipeList = []; 
+            const response = await this.$api(`${this.$API_SERVER}/api/reciperecipebox/recipe`+params, `get`, {box: $state.boxId});
             if (response.status === this.HTTP_OK) {
+                if(response.data.length){
+                // console.log(response.data);
+                response.data.forEach( obj => {
+                    this.recipeList.push({
+                        title: obj.title,
+                        subTitle: obj.subTitle,
+                        new: obj.new,
+                        score: obj.score,
+                        timeTaken: obj.timeTaken,
+                        period: obj.period,
+                        recipeId: obj.recipeId,
+                        contentsId: obj.contentsId,
+                        mainImgId: obj.mainImgId,
+                        mainImg: obj.mainImgId?`${this.$API_SERVER}/file/download/thumbnail?fileId=${obj.mainImgId}`:this.mainPicture,
+                        boxName: this.selectedRecipeBox.name?this.selectedRecipeBox.name:"기본박스",
+                        boxId: this.selectedRecipeBox.id,
+                        commentsNumber : 66   // TODO: comments
+                    })             
+                });   
+                this.bindRecipes()
+                
+                this.page++;
+                $state.loaded();
+                if(response.data.length / 2 < 1){
+                    $state.complete();
+                }
+                }else{
+                    $state.complete();
+                }
+            }else{
+                console.log(response.status);
+                $state.complete();
+            }
+        },
+        
+        async getRecipeRecipeBoxList() {    
+            let params = `?page=${this.page}`;
+                // params += '&sort=createdAt,DESC';
+            console.log(params);
+            this.recipeList = []; 
+            if(this.boxId == 'all'){
+                const response = await this.$api(`${this.$API_SERVER}/api/reciperecipebox/recipe/mine`+params, "get");
+                if (response.status === this.HTTP_OK) {
+                    if(response.data.length){
+                        console.log(response.data);
+                    }
+                }
+            }
+            else{
+                const response = await this.$api(`${this.$API_SERVER}/api/reciperecipebox/recipe`+params, `get`, {box: this.boxId});
+            if (response.status === this.HTTP_OK) {
+                if(response.data.length){
                 console.log(response.data);
                 response.data.forEach( obj => {
                     this.recipeList.push({
@@ -345,16 +492,19 @@ export default {
                         period: obj.period,
                         recipeId: obj.recipeId,
                         contentsId: obj.contentsId,
-                        fileId: obj.fileId,
-                        file: obj.fileId?`${this.$API_SERVER}/file/download/thumbnail?fileId=${obj.fileId}`:this.mainPicture,
+                        mainImgId: obj.mainImgId,
+                        mainImg: obj.mainImgId?`${this.$API_SERVER}/file/download/thumbnail?fileId=${obj.mainImgId}`:this.mainPicture,
                         boxName: this.selectedRecipeBox.name?this.selectedRecipeBox.name:"기본박스",
                         boxId: this.selectedRecipeBox.id,
                         commentsNumber : 66   // TODO: comments
                     })             
                 });   
                 this.bindRecipes()
+                }
+            }
             }
         },
+
         setEmptyImg(e) {
             e.target.src=emptyImg;
         },
@@ -375,15 +525,16 @@ export default {
                 this.selectedRecipeBoxIds.push(id);
             }
             this.selectRecipeBox(id)
+            this.step = 1
+            this.boxId = id
         },
         selectRecipeBox(id) {
             console.log(`selectRecipeBox: ${id} boxId: ${this.boxId}`);
-            location.href=`/recipebox/${id}`;
+            // location.href=`/recipebox/${id}`;
         },
         moveRecipeBox() {
             this.selectedRecipeIds.forEach(async (item, index, arr) => {
-                this.tempBoxId.forEach(async (id, index, arr) => {     
-                // console.log(`${this.selectedRecipeBox.id}?recipe=${item}&to=${id}`);           
+                this.tempBoxId.forEach(async (id, index, arr) => {                
                     const response = await this.$api(
                     `${this.$API_SERVER}/api/reciperecipebox/${this.selectedRecipeBox.id}`,
                     "post",
@@ -471,13 +622,16 @@ export default {
             this.step = 2
         },
         callAllSelect() {
-            console.log("All");
             this.selectedRecipeIds = []
             if(!this.on){
                 this.recipeList.forEach((recipe, index, arr) => {
                     this.selectedRecipeIds.push(recipe.recipeId)
                 });
             }
+            this.boxId = 'all'
+            this.step=4
+            // location.href=`/recipebox/all`;
+
         },
         callMoveRecipe() {
             console.log("Move")
@@ -598,6 +752,7 @@ export default {
             }
         },
         bindRecipes() {
+            console.log("this.bindRecipes")
             this.totRecipes = this.recipeList.length;
             let data = []
             for(var i=0;i<this.cntRecipes;i++){
@@ -635,72 +790,14 @@ export default {
         recipeAll() {
             this.step = 4
             this.boxId = 0
-        }
-    },
-    components: {
-        swiper,
-        swiperSlide,
-    },    
-    computed: {
-        swiper() {
-            console.log("computed:swiper");
-            return this.$refs.filterSwiper.swiper;
         },
-        // isOverview() {
-        //     console.log("computed:isOverview");
-        //     return window.innerWidth >= this.swiper.virtualSize
-        // }
-        allSelected: {
-            get: function() {
-                this.recipeIds = []
-                this.recipeList.slice(0,5).forEach((recipe) => {
-                    this.recipeIds.push(recipe.recipeId)
-                })
-                return this.recipeIds.length === this.selectedRecipeIds.length;
-            },
-            set: function(e) {
-                this.selectedRecipeIds = e ? this.recipeIds : [];
-            }
-        },
-    },
-    mounted () {
-        console.log("mounted");
-        // this.swiperInit();
-        // this.$nextTick(() => {
-        //     const swiperOption = this.$refs.filterSwiper.swiper;
-        //     swiperOption.controller.control = filterSwiper;
-        // });
-        // console.log(swiper)
-    },
 
-    watch: {
-        swiperOption(newValue) {
-            console.log('swiperOption:', newValue)
+        getImgURL(id) {
+            const url = `${this.$API_SERVER}/file/download/thumbnail?fileId=` + id;
+            console.log(url);
+            return url
         },
-        on(newValue){
-            console.log("on: ", newValue)
-        },
-        selectedRecipeIds(newValue){
-            console.log("selectedRecipeIds: ", newValue)
-        },  
-        tempBoxId(newValue){
-            console.log("tempBoxId: ", newValue)
-        },     
-        selectedRecipeBoxIds(newValue){
-            console.log("selectedRecipeBoxIds: ", newValue)
-        },
-        boxId(newValue){
-            console.log("boxId: ", newValue)
-        },
-        cntBoxes(newValue){
-            console.log("cntBoxes:", newValue)
-        },
-        dataFull(newValue){
-            console.log("dataFull:", newValue)
-        },
-        boxes(newValue){
-            console.log("boxes:", newValue)
-        }
+
     },
 }
 </script>
