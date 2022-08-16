@@ -1,4 +1,4 @@
-<template>
+d<template>
   <div>
     <main class="recipebox">
         <h1 class="fl"><router-link :to="'/recipedetail/'+rcpId"><img src="@/assets/images/icon_back.png" alt="돌아가기" title="돌아가기"/></router-link>
@@ -12,7 +12,7 @@
             </ul>
         </div>
         <!-- <BoxKeywordView :key="listView"></BoxKeywordView> -->
-        <span hidden>{{ step }} {{ boxId }}</span>
+        <span>{{ step }} {{ boxId }}</span>
         <div class="wrap-boxes">
             <div class="boxes">
                 <swiper class="wrap_keywords" ref="filterSwiper" :options="swiperOption" role="tablist">                    
@@ -37,7 +37,8 @@
                     <swiper-slide role="tab">
                         <div class="keywords" 
                             :class="{on : step==3 || boxId == 'new'}">
-                            <button @click="addNewBoxPage()">{{ $t('button.addNewBox') }} +</button>
+                            <!-- <button @click="addNewBoxPage()">{{ $t('button.addNewBox') }} +</button> -->
+                            <button @click="isModalViewed=true">{{ $t('button.addNewBox') }} +</button>
                         </div>
                     </swiper-slide>
                 </swiper>
@@ -57,19 +58,74 @@
                 <span hidden>선택된 레시피박스: {{ selectedRecipeBox.name }}[{{ selectedRecipeBox.id }}]</span>
             </div>
         </div>
-        <div v-if="step===1 || step===0" >
+        <div v-if="step==0">
+            <div v-for="(all, $index) in allBoxInfo" :key="$index">
+            <div v-for="(boxes, $index) in all" :key="$index">
+            <div v-for="(box, $index) in boxes" :key="$index">
+            <div v-if="selectedRecipeBox.id == box.id">
+                <div class="wrap_allnum fl">
+                    <span class="dp-inline-block fl">{{$t("content.all")}} </span>
+                    <span class="num">{{ box.recipe?box.recipe.length:0 }}</span>
+                </div>
+                <div class="btn btn-default edit fr">
+                    <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
+                </div>
+                <!-- TODO: 이부분만 갱신하도록 수정 --> 
+                <!-- TODO: 편집step==3부분도 변경 --> 
+                <div class="wrap_recipes" v-if="box.recipe.length > 0">
+                    <div class="alltitle">{{ box.name }}</div>
+                    <div class="wrap_in" v-for="(recipe, $index) in box.recipe" :key="$index">
+                    <router-link :to="'/recipedetail/'+recipe.recipeId">
+                        <div class="photo fl"><img :src="getImgURL(recipe.mainImgId)"/></div>
+                        <div class="wrap_text fl">
+                            <div class="wrap_bullet">
+                                <span v-for="(period, idx) in $t('option.period')" :key="idx">
+                                    <div class="squre4 fl" v-if="recipe.period == idx">{{ period[0] }}</div>
+                                </span>
+                                <div class="new2 fl" v-if="recipe.new"></div>
+                            </div>
+                            <div class="fr"></div>
+                            <div class="title">
+                                <div class="fl padding-right-10">{{ recipe.title }}</div>
+                                <span class="icon_reply fl"></span>
+                            </div>
+                            <div class="text">{{ recipe.subTitle }}</div>
+                        </div>
+                    </router-link>
+                    </div>
+                    <!-- ////<infinite-loading @infinite="getRecipeRecipeBoxList(boxId)">
+                        <div slot="no-more"><br/></div>
+                    </infinite-loading>//// -->
+                    <!-- <div
+                        type="button"
+                        v-on:click="appendRecipes(false)"
+                        :disabled="this.dataRcpFull === true"
+                        :hidden="this.totRecipes == this.cntRecipes"
+                        :class="{disabled : dataRcpFull}"
+                    >
+                    더보기 ({{cntRecipes}}/{{totRecipes}})
+                    </div> -->
+                </div>
+            </div>
+            </div>
+            </div>
+            </div>
+        </div>
+        <!-- <div v-if="step===1 || step===0" > -->
+        <div v-if="step==1">
             <!-- <BoxReipeView :boxId="selectedRecipeBox.id"></BoxReipeView> -->
             <div class="wrap_allnum fl">
                 <span class="dp-inline-block fl">{{$t("content.all")}} </span>
-                <span class="num">{{ recipeList.length }}</span>
+                <span class="num">{{ recipeList?recipeList.length:0 }}</span>
             </div>
             <div class="btn btn-default edit fr">
                 <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
             </div>
-            <div class="wrap_recipes">
+            <div class="wrap_recipes" v-if="recipeList.length > 0">
                 <div class="alltitle">{{ selectedRecipeBox.name }}</div>
                 <div class="wrap_in" v-for="(recipe, index) in recipes" :key="index">
                 <router-link :to="'/recipedetail/'+recipe.recipeId">
+                    <span hidden>{{recipe.mainImgId}} {{recipeList.length}} {{ recipes.length}}</span>
                     <div class="photo fl"><img :src="getImgURL(recipe.mainImgId)"/></div>
                     <div class="wrap_text fl">
                         <div class="wrap_bullet">
@@ -176,6 +232,7 @@
                             :class="{on : tempBoxId.includes(box.id)}"
                             @click="callMoveRecipeBox(box.id)">
                             {{ box.name }}
+                            <button v-on:click="callDeleteBox(box.id)">X</button>
                         </li>
                     </ul>
                     <div
@@ -191,20 +248,24 @@
                 <div class="btn btn-default" style="width:112px;" @click="cancel">{{$t("button.cancel")}}</div>
             </div>
         </div>
-        <div class="wrap_newbox" id="new-box" v-if="step===3">
+            <ModalView v-if="isModalViewed" @close-modal="isModalViewed=false">
+            <div slot="body">
             <!-- <fieldset class="wrap_in"> -->
                 <!-- <legend>새 박스 추가</legend> -->
                 <form v-on:submit="onSubmitForm">
-                    <label class="title" for="newBox">새 박스 추가</label><br/>
-                    <input class="width80" type="text" v-model="newBox" maxlength="10" placeholder="새로운 박스의 이름을 입력해 주세요."> <div class="btn btn-default"><button style="none">추가</button></div>
+                    <h1><label class="title" for="newBox">박스 추가</label></h1><br/>
+                    <input class="width90" type="text" v-model="newBox" maxlength="10" placeholder="박스 명(최대 13자)">
+                <div>
+                    <label id="result-label" hidden for="result"></label><br/>
+                    <div class="btn btn-default fl margin-left-30 margin-bottom-40" @click="isModalViewed=false">{{$t("button.cancel")}}</div>
+                    <div class="btn btn-default fl margin-left-10"><button style="none">저장</button></div>
+                </div>
                 </form>
             <!-- </fieldset> -->
-            <div>
-            <label id="result-label" hidden for="result"></label><br/>
-            <div class="btn btn-default fl margin-bottom-40" @click="cancel">{{$t("button.cancel")}}</div>
-            <div class="btn btn-default fl" @click="done">{{$t("button.done")}}</div>
             </div>
-        </div>
+            </ModalView>
+        <!-- <div class="wrap_newbox" id="new-box" v-if="step===3">
+        </div> -->
         <div v-if="step===4">
             <!-- <BoxReipeView :boxId="boxId"></BoxReipeView> -->
             <div class="wrap_allnum fl">
@@ -214,6 +275,7 @@
             <div class="btn btn-default edit fr">
                 <span class="padding-right-5" @click="callEdit">{{$t("button.edit")}}</span>
             </div>
+            <!-- TODO: 이부분을 갱신해서 가져오도록 수정 -->
             <div class="wrap_recipes">
                 <div v-for="(box, $index) in recipeBoxes" :key="$index">
                 <div class="alltitle" v-if="box.isDefault===false && box.recipe && box.recipe.length > 0">{{ box.name }}</div>
@@ -267,6 +329,7 @@ import { mapGetters, mapActions } from "vuex";
 import BoxKeywordView from '@/components/BoxKeywordView.vue';
 import InfiniteLoading from 'vue-infinite-loading';
 import BoxReipeView from '@/components/BoxReipeView.vue';
+import ModalView from '@/components/ModalView.vue';
 
 export default {
     name : "RecipeBoxView",
@@ -311,7 +374,7 @@ export default {
         // boxesAll: {},    // 전체 데이터
         boxes: {},       // 화면에 노출되는 데이터
         totBoxes: 0,     // 전체 데이터 수
-        cntBoxes: 4,     // 화면에 노출할 데이터 수 (초기 세팅 = 4) 기본박스 + 1
+        cntBoxes: 3,     // 화면에 노출할 데이터 수 (초기 세팅 = 3) 기본박스 + 1
         dataFull: false,// 전체 데이터보다 많은 데이터 호출 여부
         // 담긴 레시피 목록 더보기
         // recipesAll: {},    // 전체 레시피 목록 데이터
@@ -320,7 +383,8 @@ export default {
         cntRecipes: 5,     // 화면에 노출할 데이터 수 (초기 세팅 = 5)
         dataRcpFull: false,// 전체 데이터보다 많은 데이터 호출 여부
         page : 0,
-        allBoxInfo: []
+        allBoxInfo: [],
+        isModalViewed: false,
     }),
     
     components: {
@@ -328,7 +392,9 @@ export default {
     swiperSlide,
     InfiniteLoading,
     BoxKeywordView,
-    BoxReipeView
+    BoxReipeView,
+    ModalView,
+    ModalView
 },    
 
     computed: {
@@ -361,9 +427,10 @@ export default {
     },
 
     watch: {
-        boxId(boxId) {            
+        boxId(boxId) {          
             this.getRecipeBoxById(boxId)
             this.getRecipeRecipeBoxList(boxId)
+            // makeRecipeList()
         }
     },
 
@@ -375,10 +442,34 @@ export default {
                 this.step = 4
             } else{
                 this.getRecipeBoxById(this.boxId)
-                this.getRecipeRecipeBoxList(this.boxId)
+                // this.getRecipeRecipeBoxList(this.boxId)
             }
         },
-        
+        makeRecipeList(){
+            this.recipeBoxes.forEach(box => {
+                if(box.recipe){
+                    if(box.id == this.boxId){
+                        this.recipeList.push({
+                            title: recipe.title,
+                            subTitle: recipe.subTitle,
+                            new: recipe.new,
+                            score: recipe.score,
+                            timeTaken: recipe.timeTaken,
+                            period: recipe.period,
+                            recipeId: recipe.recipeId,
+                            contentsId: recipe.contentsId,
+                            mainImgId: recipe.mainImgId,
+                            boxName: this.selectedRecipeBox.name?this.selectedRecipeBox.name:"기본박스",
+                            boxId: this.selectedRecipeBox.id,
+                        })
+                    }
+                }
+                console.log("====", this.recipeList)
+            });
+            
+                        
+        },
+        // recipeBoxes
         async getRecipeBoxAll() {
             let params = '';
                 // params += `?page=${this.page}`;
@@ -412,7 +503,7 @@ export default {
                 console.log(this.allBoxInfo)
             }
         },
-        
+        // selectedRecipeBox
         async getRecipeBoxById(id) {
             const response = await this.$api(
             `${this.$API_SERVER}/api/recipebox/${id}`,
@@ -422,7 +513,7 @@ export default {
                 this.selectedRecipeBox = response.data;
             }
         },
-        
+        // recipeList
         async getRecipeRecipeBoxList($state) {    
             let params = `?page=${this.page}`;
                 // params += '&sort=createdAt,DESC';
@@ -448,8 +539,7 @@ export default {
                         boxId: this.selectedRecipeBox.id,
                         commentsNumber : 66   // TODO: comments
                     })             
-                });   
-                this.bindRecipes()
+                });
                 
                 this.page++;
                 $state.loaded();
@@ -463,6 +553,7 @@ export default {
                 console.log(response.status);
                 $state.complete();
             }
+            this.bindRecipes()
         },
         
         async getRecipeRecipeBoxList() {    
@@ -526,7 +617,7 @@ export default {
                 this.selectedRecipeBoxIds.push(id);
             }
             this.selectRecipeBox(id)
-            this.step = 1
+            this.step = 0
             this.boxId = id
         },
         selectRecipeBox(id) {
@@ -576,6 +667,7 @@ export default {
                 element.innerText = text;
             }
             e.preventDefault();
+            this.isModalViewed = false
         },
         async addNewBox(name) {
             console.log("addNewBox : "+name);
@@ -708,6 +800,7 @@ export default {
             }
             this.step = 1
             this.moveStep = 0
+            this.cntBoxes = 3;
             this.initialize();
         },
         done() {
@@ -723,8 +816,9 @@ export default {
             }
             this.step = 1
             this.moveStep = 0
-            //this.initialize();            
-            this.bindRecipes()
+            this.cntBoxes = 3;
+            this.initialize();
+            // this.bindRecipes()
         },
         bindBoxes() {
             this.totBoxes = this.recipeBoxes.length;
@@ -754,15 +848,20 @@ export default {
             }
         },
         bindRecipes() {
-            console.log("this.bindRecipes")
+            console.log("this.bindRecipes", this.recipeList)
             this.totRecipes = this.recipeList.length;
             let data = []
-            for(var i=0;i<this.cntRecipes;i++){
-                if(this.recipeList[i])
-                    data.push(this.recipeList[i])
-                else
-                    this.cntRecipes = i
-            }
+            let idx = 0
+            // FIXME: this.recipeList[i] 값이 있으나 체크 못하는 경우가 있어서 forEach로 변경함
+            this.recipeList.forEach((recipe, index, array) => {
+                if(recipe){
+                    data.push(recipe)
+                    idx = index + 1
+                }
+                if(index>=this.cntRecipes)
+                    return true;
+            })
+            this.cntRecipes = idx;
             this.recipes = data;
         },
         appendRecipes(all) {
