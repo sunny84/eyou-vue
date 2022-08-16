@@ -55,6 +55,7 @@
                           <div class="circleNum">{{ box.recipe?box.recipe.length:0 }}</div>
                           <div class="title">{{ box.name }}</div>
                           <div class="new" v-if="box.new"></div>
+                          <button hidden v-on:click="callDeleteBox(box.id)">X</button>
                       </div>
                       <div v-if="box.recipe">
                           <div class="photo" v-for="(r, $i) in box.recipe.slice(0,1)" :key="$i">
@@ -259,4 +260,14 @@ export default {
 </script>
 
 <style scoped>
+button
+{
+    background: inherit ; 
+    border:none; 
+    box-shadow:none; 
+    border-radius:0; 
+    padding:0; 
+    overflow:visible; 
+    cursor:pointer
+}
 </style>

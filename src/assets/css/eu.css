@@ -171,6 +171,7 @@ main.recipebox .wrap_recipes .column1.on .photo     {padding: 0;margin: 0 10px 0
 main.recipebox .wrap_recipes .column1:hover .photo img,
 main.recipebox .wrap_recipes .column1.full:hover .photo img,
 main.recipebox .wrap_recipes .column1.on .photo img {width: 100%; height: 100%;}
+main.recipebox .wrap_recipes .column1 .wrap_row .del{float: right;margin-top:5px; background: url(../images/btn_close.png)50% 50% no-repeat;width:35px;height: 16px;display:block;}
 
 main.recipebox .wrap_recipes .column1.off {width: 50%;}
 main.recipebox .wrap_recipes .column1.off .wrap_row {height:24px;}

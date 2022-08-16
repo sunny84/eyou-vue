@@ -232,7 +232,7 @@ d<template>
                             :class="{on : tempBoxId.includes(box.id)}"
                             @click="callMoveRecipeBox(box.id)">
                             {{ box.name }}
-                            <button v-on:click="callDeleteBox(box.id)">X</button>
+                            <button hidden v-on:click="callDeleteBox(box.id)">X</button>
                         </li>
                     </ul>
                     <div
